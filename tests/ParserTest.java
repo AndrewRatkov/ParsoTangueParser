@@ -199,7 +199,7 @@ public class ParserTest {
     @Test
     void testParseLongPrimaryExpr() {
         Stack<Node> st_nodes = new Stack<>();
-        int LEN = 1000;
+        int LEN = 10000;
         for (int i = 0; i < LEN; ++i) {
             st_nodes.push(new Node(Expr.IntExpr, String.valueOf(i)));
         }

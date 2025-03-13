@@ -19,16 +19,17 @@ public class Parser{
         this.Strings = new HashSet<>();
     }
 
-    private boolean isWhitespace(char c) {
-        return " \t\r\n".indexOf(c) != -1;
+    public Parser(HashSet<String> _Integers, HashSet<String> _Strings) {
+        this.Integers = _Integers;
+        this.Strings = _Strings;
     }
 
 
     public Pair<ReaderResponses, Integer> read(char[] str, int idx) {
         if (idx >= str.length) {
             return new Pair<>(ReaderResponses.FINISHED_READING, -1);
-        } else if (isWhitespace(str[idx])) {
-            while (idx < str.length && isWhitespace(str[idx])) ++idx;
+        } else if (Character.isWhitespace(str[idx])) {
+            while (idx < str.length && Character.isWhitespace(str[idx])) ++idx;
             return new Pair<>(ReaderResponses.SKIPPED, idx);
         } else if (str[idx] == '(') {
             return new Pair<>(ReaderResponses.OPENNING_BRACKET, idx + 1);
@@ -50,7 +51,7 @@ public class Parser{
             }
         } else if (Character.isDigit(str[idx])) { // reading an integer
             while (idx < str.length && Character.isDigit(str[idx])) ++idx;
-            if (idx == str.length || isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
+            if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
                 return new Pair<>(ReaderResponses.READ_INTEGER, idx);
             } else {
                 return new Pair<>(ReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, idx);
@@ -62,7 +63,7 @@ public class Parser{
             return new Pair<>(ReaderResponses.READ_STRING, idx + 1);
         } else if (Character.isLetter(str[idx])){ // reading a variable
             while (Character.isLetterOrDigit(str[idx])) ++idx;
-            if (idx == str.length || isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
+            if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
                 return new Pair<>(ReaderResponses.READ_VARIABLE, idx);
             } else {
                 return new Pair<>(ReaderResponses.ERROR_AFTER_VARIABLE, idx);
