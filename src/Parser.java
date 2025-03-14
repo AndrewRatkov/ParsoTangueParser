@@ -11,8 +11,8 @@ import java.util.ArrayList;
  * Затем это дерево разбора можно напечатать в файл, например
 */
 public class Parser{
-    private HashSet<String> Integers;
-    private HashSet<String> Strings;
+    public HashSet<String> Integers;
+    public HashSet<String> Strings;
 
     public Parser() {
         this.Integers = new HashSet<>();
@@ -62,7 +62,7 @@ public class Parser{
             if (idx == str.length) return new Pair<>(ReaderResponses.ERROR_STRING_DOESNT_END, idx);
             return new Pair<>(ReaderResponses.READ_STRING, idx + 1);
         } else if (Character.isLetter(str[idx])){ // reading a variable
-            while (Character.isLetterOrDigit(str[idx])) ++idx;
+            while (idx < str.length && Character.isLetterOrDigit(str[idx])) ++idx;
             if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
                 return new Pair<>(ReaderResponses.READ_VARIABLE, idx);
             } else {

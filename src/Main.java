@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 public class Main {
 
@@ -33,13 +34,17 @@ public class Main {
         }
 
         String input = args[0], output = args[1];
-        Parser parser = new Parser();
+        InstrParser parser = new InstrParser();
 
         try {
             String text = readFile(input);
-            //System.out.println(text);
-            Node root = parser.parseExpr(text);
-            writeFile(output, root.buildTree());
+            List<String> instructions = InstructionSplitter.splitText(text);
+            String tree = "";
+            for (String instr : instructions) {
+                InstrNode root = parser.parseInstr(instr);
+                tree += root.buildTree() + '\n';    
+            }
+            writeFile(output, tree);
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);

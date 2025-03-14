@@ -8,36 +8,33 @@ import java.util.HashSet;
  * -- где Expression -- выражение,
  * задаваемое Node и распознаваемое с помощью Parser, при этом переменная x еще не была объявлена
  * Вместо Type может быть int либо str (целочисленный тип либо строковый)
- * При этом проверяем, что Expression звдвёт тот же тип, что и Type
+ * При этом проверяем, что Expression задаёт тот же тип, что и Type
  * 2) x := Expression;
  * -- то же самое, но переменная x была уже объявлена.
  * При этом запрещаем переменной x менять тип (то есть если она была типа str,
  * а Expression задает целое число, то это ошибка)
  */
 public class InstrParser{
-    private HashSet<String> Integers;
-    private HashSet<String> Strings;
+    private Parser expr_parser;
 
     public InstrParser() {
-        this.Integers = new HashSet<>();
-        this.Strings = new HashSet<>();
+        this.expr_parser = new Parser();
     }
 
     public InstrParser(HashSet<String> _Integers, HashSet<String> _Strings) {
-        this.Integers = _Integers;
-        this.Strings = _Strings;
+        this.expr_parser = new Parser(_Integers, _Strings);
     }
 
     public InstrNode parseInstr(String str) {
         if (!str.endsWith(";")) { // instruction must end with 
-            return new InstrNode(Expr.ErrorExpr, "Instruction must end with \";\"", new Node(Expr.ErrorExpr, ""));
+            return new InstrNode(Expr.ErrorExpr, "Instruction must end with \";\"", null);
         }
 
         int idx = 0;
         char[] char_array = str.toCharArray();
         while (Character.isWhitespace(char_array[idx])) ++idx;
         if (!Character.isLetter(char_array[idx])) {
-            return new InstrNode(Expr.ErrorExpr, "Instruction cannot start with not a letter", new Node(Expr.ErrorExpr, ""));
+            return new InstrNode(Expr.ErrorExpr, "Instruction cannot start with not a letter", null);
         }
 
         String first_word = "";
@@ -50,7 +47,7 @@ public class InstrParser{
         String var_name = "";
         if (!type_declared) { // 2nd case: x := Expression;
             var_name = first_word;
-            if ((!Integers.contains(var_name)) && (!Strings.contains(var_name))) {
+            if ((!expr_parser.Integers.contains(var_name)) && (!expr_parser.Strings.contains(var_name))) {
                 return new InstrNode(Expr.ErrorExpr, "Variable should have been initialized before", null);
             }
         } else { // 1st case: Type x := expression;
@@ -67,7 +64,7 @@ public class InstrParser{
                 return new InstrNode(Expr.ErrorExpr, "Variable name cannot be a type name", null);
             }
 
-            if (Integers.contains(var_name) || Strings.contains(var_name)) {
+            if (expr_parser.Integers.contains(var_name) || expr_parser.Strings.contains(var_name)) {
                 return new InstrNode(Expr.ErrorExpr, "Variable was initialized before", null);
             }
         }
@@ -78,17 +75,24 @@ public class InstrParser{
         }
         idx += 2;
 
-        /* TODO: get the expression */
+        String expression = new String(char_array, idx, char_array.length - idx - 1);
+        Node expr = expr_parser.parseExpr(expression);
+
+        Expr type_of_expr_expected;
+        if (type_declared) type_of_expr_expected = Constants.get_type(first_word);
+        else if (expr_parser.Integers.contains(var_name)) type_of_expr_expected = Expr.IntExpr;
+        else type_of_expr_expected = Expr.StringExpr;
+
+        if (expr.type != type_of_expr_expected) {   
+            return new InstrNode(Expr.ErrorExpr, "Expression cannot be not parsed with expected type", null);
+        }
 
         if (type_declared) {
-            Expr type_of_expr_expected = Constants.get_type(first_word);
-            /* TODO: check types */
-            if (type_of_expr_expected == Expr.IntExpr) Integers.add(var_name);
-            else Strings.add(var_name);
+            if (type_of_expr_expected == Expr.IntExpr) expr_parser.Integers.add(var_name);
+            else expr_parser.Strings.add(var_name);
         }
         
-
-        return new InstrNode(null, str, null);
+        return new InstrNode(type_of_expr_expected, var_name, expr);
     }
     
 }

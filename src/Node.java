@@ -71,7 +71,7 @@ public class Node {
     }
     private static int GET_STR_LENGTH = 8;
     
-    private enum Move{
+    private enum Move{ // used in buildTree method in tree graph traversal by dfs
         LEFT,
         RIGHT
     }
@@ -96,7 +96,7 @@ public class Node {
         shifts.put(this, 0);
         
         Integer cur_height = 0;
-        Stack<Node> nodes_by_depth = new Stack<>(); // put here the nodes in such a way that parent nodes are topper
+        Stack<Node> nodes_by_depth = new Stack<>(); // put here the nodes in such a way that parent nodes are topper [nodes are "sorted" by depth]
         
         while (!moves.empty()) {
             Move last_move = moves.getLast();

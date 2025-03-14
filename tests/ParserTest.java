@@ -1,6 +1,8 @@
 package tests;
 
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Stack;
 
@@ -154,7 +156,7 @@ public class ParserTest {
             "LR", BinopConstants.MUL
         );
 
-        assert checkStructure(root, expected_vals, expected_binops);
+        assertTrue(checkStructure(root, expected_vals, expected_binops));
     }
 
     @Test
@@ -193,7 +195,7 @@ public class ParserTest {
             "LL", BinopConstants.DIV
         );
 
-        assert checkStructure(root, expected_vals, expected_binops);
+        assertTrue(checkStructure(root, expected_vals, expected_binops));
     }
 
     @Test
@@ -255,6 +257,17 @@ public class ParserTest {
         assertTrue(root.left.type == Expr.IntExpr);
         assertTrue(goToChild(root, "LR", "2"));
         assertTrue(goToChild(root, "LL", "1"));
+    }
+
+    @Test
+    void testParseExprWithVariables() {
+        Parser p = new Parser(new HashSet<String>(Arrays.asList("x", "y")),
+                              new HashSet<String>(Arrays.asList("z", "t")));
+
+        assertTrue(p.parseExpr("(x+y)>=(z==t)").type == Expr.IntExpr);
+        assertTrue(p.parseExpr("x*z+30*t==z*(t==t)").type == Expr.IntExpr);
+        assertTrue(p.parseExpr("60*t+(3>2)*z").type == Expr.StringExpr);
+        assertTrue(p.parseExpr("60*t==(3>2)*(z!=z)").type == Expr.ErrorExpr);
     }
 
 }
