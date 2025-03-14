@@ -13,11 +13,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-import src.Parser;
+import src.ExprParser;
 import src.ReaderResponses;
 import src.BinopConstants;
 import src.Expr;
-import src.Node;
+import src.ExprNode;
 import src.Binop;
 
 
@@ -25,7 +25,7 @@ import src.Binop;
 public class ParserTest {
     @Test
     void testRead() {
-        Parser p = new Parser();
+        ExprParser p = new ExprParser();
 
         assertTrue(p.read("123".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 3));
         assertTrue(p.read("12 3".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 2));
@@ -74,9 +74,9 @@ public class ParserTest {
         assertTrue(p.read("10!3==1".toCharArray(), 2).isSame(ReaderResponses.ERROR_UNKNOWN_CHAR, 3));
     }
 
-    private boolean goToChild(Node node, String path, String expected_val) {
+    private boolean goToChild(ExprNode node, String path, String expected_val) {
         /*for example, path="LLRLRRL" */
-        Node cur_node = node;
+        ExprNode cur_node = node;
         for (char c : path.toCharArray()) {
             if (c == 'L') {
                 if (cur_node.left == null) return false;
@@ -91,10 +91,10 @@ public class ParserTest {
         return cur_node.value.equals(expected_val);
     }
 
-    private boolean checkBinop(Node node, String path, Binop expected_binop) {
+    private boolean checkBinop(ExprNode node, String path, Binop expected_binop) {
         /* for example, path="LLRLRRL" */
 
-        Node cur_node = node;
+        ExprNode cur_node = node;
         for (char c : path.toCharArray()) {
             if (c == 'L') {
                 if (cur_node.left == null) return false;
@@ -110,7 +110,7 @@ public class ParserTest {
         return cur_node.binop == expected_binop;
     }
 
-    private boolean checkStructure(Node node, Map<String, String> expected_vals, Map<String, Binop>expected_binops) {
+    private boolean checkStructure(ExprNode node, Map<String, String> expected_vals, Map<String, Binop>expected_binops) {
         for (String path : expected_vals.keySet()) {
             if (!goToChild(node, path, expected_vals.get(path))) return false;
         }
@@ -122,11 +122,11 @@ public class ParserTest {
 
     @Test
     void testParsePrimaryExpr1() {
-        Stack<Node> st_nodes = new Stack<>();
-        st_nodes.push(new Node(Expr.IntExpr, "2"));
-        st_nodes.push(new Node(Expr.IntExpr, "3"));
-        st_nodes.push(new Node(Expr.IntExpr, "5"));
-        st_nodes.push(new Node(Expr.IntExpr, "4"));
+        Stack<ExprNode> st_nodes = new Stack<>();
+        st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "3"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "5"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "4"));
 
         Stack<Binop> st_binops = new Stack<>();
         st_binops.push(BinopConstants.ADD);
@@ -141,8 +141,8 @@ public class ParserTest {
               +-------+--+
                       |
         */
-        Parser p = new Parser();
-        Node root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
+        ExprParser p = new ExprParser();
+        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
             "LL", "2",
@@ -161,11 +161,11 @@ public class ParserTest {
 
     @Test
     void testParsePrimaryExpr2() {
-        Stack<Node> st_nodes = new Stack<>();
-        st_nodes.push(new Node(Expr.IntExpr, "2"));
-        st_nodes.push(new Node(Expr.IntExpr, "2"));
-        st_nodes.push(new Node(Expr.IntExpr, "2"));
-        st_nodes.push(new Node(Expr.IntExpr, "5"));
+        Stack<ExprNode> st_nodes = new Stack<>();
+        st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
+        st_nodes.push(new ExprNode(Expr.IntExpr, "5"));
 
         Stack<Binop> st_binops = new Stack<>();
         st_binops.push(BinopConstants.DIV);
@@ -180,8 +180,8 @@ public class ParserTest {
                   +---+--+
                       |
         */
-        Parser p = new Parser();
-        Node root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
+        ExprParser p = new ExprParser();
+        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
             "LLL", "2",
@@ -200,18 +200,18 @@ public class ParserTest {
 
     @Test
     void testParseLongPrimaryExpr() {
-        Stack<Node> st_nodes = new Stack<>();
+        Stack<ExprNode> st_nodes = new Stack<>();
         int LEN = 10000;
         for (int i = 0; i < LEN; ++i) {
-            st_nodes.push(new Node(Expr.IntExpr, String.valueOf(i)));
+            st_nodes.push(new ExprNode(Expr.IntExpr, String.valueOf(i)));
         }
         Stack<Binop> st_binops = new Stack<>();
         for (int i = 0; i < LEN - 1; ++i) {
             st_binops.push(BinopConstants.SUB);
         }
 
-        Parser p = new Parser();
-        Node root = p.parsePrimaryExpr(st_nodes, st_binops, LEN);
+        ExprParser p = new ExprParser();
+        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, LEN);
         
         String s = "";
         for (int i = 0; i < LEN - 1; ++i) {
@@ -230,8 +230,8 @@ public class ParserTest {
         "(1 == 2) < 3"
     })
     void testParseExpr(String expr) {
-        Parser p = new Parser();
-        Node root = p.parseExpr(expr);
+        ExprParser p = new ExprParser();
+        ExprNode root = p.parseExpr(expr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
         assertTrue(goToChild(root, "R", "3"));
@@ -247,8 +247,8 @@ public class ParserTest {
         "(1 == 2) < \"3\""
     })
     void testParseExpr2(String expr) {
-        Parser p = new Parser();
-        Node root = p.parseExpr(expr);
+        ExprParser p = new ExprParser();
+        ExprNode root = p.parseExpr(expr);
         assertTrue(root.type == Expr.ErrorExpr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
@@ -261,7 +261,7 @@ public class ParserTest {
 
     @Test
     void testParseExprWithVariables() {
-        Parser p = new Parser(new HashSet<String>(Arrays.asList("x", "y")),
+        ExprParser p = new ExprParser(new HashSet<String>(Arrays.asList("x", "y")),
                               new HashSet<String>(Arrays.asList("z", "t")));
 
         assertTrue(p.parseExpr("(x+y)>=(z==t)").type == Expr.IntExpr);

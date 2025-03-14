@@ -3,9 +3,9 @@ package src;
 public class InstrNode {
     public Expr type;
     public String var_name;
-    public Node expression;
+    public ExprNode expression;
 
-    public InstrNode(Expr _type, String _var_name, Node _expression) {
+    public InstrNode(Expr _type, String _var_name, ExprNode _expression) {
         this.type = _type;
         this.var_name = _var_name;
         this.expression = _expression;

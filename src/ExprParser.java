@@ -10,16 +10,16 @@ import java.util.ArrayList;
  * и строить для неё дерево разбора.
  * Затем это дерево разбора можно напечатать в файл, например
 */
-public class Parser{
+public class ExprParser{
     public HashSet<String> Integers;
     public HashSet<String> Strings;
 
-    public Parser() {
+    public ExprParser() {
         this.Integers = new HashSet<>();
         this.Strings = new HashSet<>();
     }
 
-    public Parser(HashSet<String> _Integers, HashSet<String> _Strings) {
+    public ExprParser(HashSet<String> _Integers, HashSet<String> _Strings) {
         this.Integers = _Integers;
         this.Strings = _Strings;
     }
@@ -73,14 +73,14 @@ public class Parser{
         }
     }
 
-    public Node parsePrimaryExpr(Stack<Node> nodes, Stack<Binop> binops, int last_nodes) {
+    public ExprNode parsePrimaryExpr(Stack<ExprNode> nodes, Stack<Binop> binops, int last_nodes) {
         // pop last (last_nodes) elements from nodes and apply their binops to them
         assert last_nodes > 0;
-        Node t = nodes.pop();
+        ExprNode t = nodes.pop();
         if (last_nodes == 1) return t;
 
         // repack last (last_nodes) nodes and last (last_nodes - 1) binops into new arraylists
-        Stack<Node> temp_stack_nodes = new Stack<>();
+        Stack<ExprNode> temp_stack_nodes = new Stack<>();
         temp_stack_nodes.push(t);
         Stack<Binop> temp_stack_binops = new Stack<>();
         for (int k = 0; k < last_nodes - 1; ++k) {
@@ -88,7 +88,7 @@ public class Parser{
             temp_stack_binops.push(binops.pop());
         }
         
-        List<Node> expr_nodes = new ArrayList<>();
+        List<ExprNode> expr_nodes = new ArrayList<>();
         while (!temp_stack_nodes.isEmpty()) expr_nodes.add(temp_stack_nodes.pop());
 
         List<Binop> expr_binops = new ArrayList<>();
@@ -98,7 +98,7 @@ public class Parser{
         for (int pr = BinopConstants.MAX_PROPRITY; pr >= BinopConstants.MIN_PROPRITY; --pr) {
             assert expr_binops.size() + 1 == expr_nodes.size();
 
-            List<Node> new_nodes = new ArrayList<>();
+            List<ExprNode> new_nodes = new ArrayList<>();
             new_nodes.add(expr_nodes.get(0));
             List<Binop> new_binops = new ArrayList<>();
 
@@ -107,8 +107,8 @@ public class Parser{
                     new_nodes.add(expr_nodes.get(k + 1));
                     new_binops.add(expr_binops.get(k));
                 } else {
-                    Node lst = new_nodes.removeLast();
-                    new_nodes.add(new Node(lst, expr_nodes.get(k + 1), expr_binops.get(k)));
+                    ExprNode lst = new_nodes.removeLast();
+                    new_nodes.add(new ExprNode(lst, expr_nodes.get(k + 1), expr_binops.get(k)));
                 }
             }
 
@@ -120,7 +120,7 @@ public class Parser{
         return expr_nodes.get(0);
     }
 
-    public Node parseExpr(String str) {
+    public ExprNode parseExpr(String str) {
         int opened_brackets = 0;
         int used_quotes = 0;
         boolean in_string = false;
@@ -141,14 +141,14 @@ public class Parser{
                 } else --opened_brackets;
             }
         }
-        if (opened_brackets > 0) return new Node(Expr.ErrorExpr, "Too many opened brackets");
-        else if (used_quotes % 2 == 1) return new Node(Expr.ErrorExpr, "Not finished string");
-        else if (!correct_brackets_sequence) return new Node(Expr.ErrorExpr, "Incorrect brackets sequence");
+        if (opened_brackets > 0) return new ExprNode(Expr.ErrorExpr, "Too many opened brackets");
+        else if (used_quotes % 2 == 1) return new ExprNode(Expr.ErrorExpr, "Not finished string");
+        else if (!correct_brackets_sequence) return new ExprNode(Expr.ErrorExpr, "Incorrect brackets sequence");
 
-        Integer idx = 0;
-        Boolean expected_value = true;
+        int idx = 0;
+        boolean expected_a_value = true;
         Stack<Integer> openning_brackets = new Stack<>();
-        Stack<Node> nodes = new Stack<>();
+        Stack<ExprNode> nodes = new Stack<>();
         Stack<Binop> binops = new Stack<>();
 
         Pair<ReaderResponses, Integer> p = read(char_array, idx);
@@ -156,66 +156,66 @@ public class Parser{
             // System.out.println(p);
             switch (p.first()) {
                 case ERROR_AFTER_VARIABLE:
-                    return new Node(Expr.ErrorExpr, "Character " + char_array[p.second()] + " after variable name");
+                    return new ExprNode(Expr.ErrorExpr, "Character " + char_array[p.second()] + " after variable name");
                 case ERROR_UNKNOWN_CHAR:
-                    return new Node(Expr.ErrorExpr, "Unknown character " + char_array[idx]);
+                    return new ExprNode(Expr.ErrorExpr, "Unknown character " + char_array[idx]);
                 case ERROR_VAR_STARTS_WITH_DIGITS:
-                    return new Node(Expr.ErrorExpr, "Variable starts with digits");
+                    return new ExprNode(Expr.ErrorExpr, "Variable starts with digits");
                 case OPENNING_BRACKET:
                     openning_brackets.push(nodes.size());
                     break;
                 case SKIPPED:
                     break;
                 case READ_BINOP:
-                    if (expected_value) {
-                        return new Node(Expr.ErrorExpr, "Expected value, got binop");
+                    if (expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Expected value, got binop");
                     } else {
                         Binop new_binop = BinopConstants.get_by_string(String.copyValueOf(char_array, idx, p.second() - idx));
                         binops.push(new_binop);
-                        expected_value = true;
+                        expected_a_value = true;
                         break;
                     }
                 case READ_INTEGER:
-                    if (!expected_value) {
-                        return new Node(Expr.ErrorExpr, "Expected binop, got value");
+                    if (!expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
-                        Node new_node = new Node(Expr.IntExpr, String.copyValueOf(char_array, idx, p.second() - idx));
+                        ExprNode new_node = new ExprNode(Expr.IntExpr, String.copyValueOf(char_array, idx, p.second() - idx));
                         nodes.push(new_node);
-                        expected_value = false;
+                        expected_a_value = false;
                         break;
                     }
                 case READ_STRING:
-                    if (!expected_value) {
-                        return new Node(Expr.ErrorExpr, "Expected binop, got value");
+                    if (!expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
-                        Node new_node = new Node(Expr.StringExpr, String.copyValueOf(char_array, idx, p.second() - idx));
+                        ExprNode new_node = new ExprNode(Expr.StringExpr, String.copyValueOf(char_array, idx, p.second() - idx));
                         nodes.push(new_node);
-                        expected_value = false;
+                        expected_a_value = false;
                         break;
                     }
                 case READ_VARIABLE:
-                    if (!expected_value) {
-                        return new Node(Expr.ErrorExpr, "Expected binop, got value");
+                    if (!expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
                         String var_name = String.copyValueOf(char_array, idx, p.second() - idx);
-                        Node new_node;
+                        ExprNode new_node;
                         if (Integers.contains(var_name)) {
-                            new_node = new Node(Expr.IntExpr, var_name);
+                            new_node = new ExprNode(Expr.IntExpr, var_name);
                         } else if (Strings.contains(var_name)) {
-                            new_node = new Node(Expr.StringExpr, var_name);
+                            new_node = new ExprNode(Expr.StringExpr, var_name);
                         } else {
-                            return new Node(Expr.ErrorExpr, "Unknown variable");
+                            return new ExprNode(Expr.ErrorExpr, "Unknown variable");
                         }
                         nodes.push(new_node);
-                        expected_value = false;
+                        expected_a_value = false;
                         break;
                     }
                 case CLOSING_BRACKET:
-                    if (expected_value) {
-                        return new Node(Expr.ErrorExpr, "Got ')' after a binary operator, expected a value");
+                    if (expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Got ')' after a binary operator, expected a value");
                     } 
                     Integer last_openning_bracket = openning_brackets.pop();
-                    Node new_node = parsePrimaryExpr(nodes, binops, nodes.size() - last_openning_bracket);
+                    ExprNode new_node = parsePrimaryExpr(nodes, binops, nodes.size() - last_openning_bracket);
                     nodes.push(new_node);
                     break;
                 case FINISHED_READING:

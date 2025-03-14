@@ -15,14 +15,14 @@ import java.util.HashSet;
  * а Expression задает целое число, то это ошибка)
  */
 public class InstrParser{
-    private Parser expr_parser;
+    private ExprParser expr_parser;
 
     public InstrParser() {
-        this.expr_parser = new Parser();
+        this.expr_parser = new ExprParser();
     }
 
     public InstrParser(HashSet<String> _Integers, HashSet<String> _Strings) {
-        this.expr_parser = new Parser(_Integers, _Strings);
+        this.expr_parser = new ExprParser(_Integers, _Strings);
     }
 
     public InstrNode parseInstr(String str) {
@@ -76,12 +76,11 @@ public class InstrParser{
         idx += 2;
 
         String expression = new String(char_array, idx, char_array.length - idx - 1);
-        Node expr = expr_parser.parseExpr(expression);
+        ExprNode expr = expr_parser.parseExpr(expression);
 
         Expr type_of_expr_expected;
         if (type_declared) type_of_expr_expected = Constants.get_type(first_word);
-        else if (expr_parser.Integers.contains(var_name)) type_of_expr_expected = Expr.IntExpr;
-        else type_of_expr_expected = Expr.StringExpr;
+        else type_of_expr_expected = (expr_parser.Integers.contains(var_name) ? Expr.IntExpr : Expr.StringExpr);
 
         if (expr.type != type_of_expr_expected) {   
             return new InstrNode(Expr.ErrorExpr, "Expression cannot be not parsed with expected type", null);

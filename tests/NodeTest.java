@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import src.Node;
+import src.ExprNode;
 import src.Expr;
 import src.BinopConstants;
 import src.Binop;
@@ -14,7 +14,7 @@ import src.Binop;
 public class NodeTest {
     @Test
     void defaultConstructorTest() {
-        Node n = new Node(Expr.StringExpr, "hrundelair");
+        ExprNode n = new ExprNode(Expr.StringExpr, "hrundelair");
         assertEquals(n.type, Expr.StringExpr);
         assertEquals(n.value, "hrundelair");
         assertEquals(n.left, null);
@@ -24,9 +24,9 @@ public class NodeTest {
 
     @Test
     void fromTwoConstructorTest() {
-        Node a = new Node(Expr.IntExpr, "30");
-        Node b = new Node(Expr.IntExpr, "12345");
-        Node parent = new Node(a, b, BinopConstants.ADD);
+        ExprNode a = new ExprNode(Expr.IntExpr, "30");
+        ExprNode b = new ExprNode(Expr.IntExpr, "12345");
+        ExprNode parent = new ExprNode(a, b, BinopConstants.ADD);
 
         assertEquals(parent.type, Expr.IntExpr);
         assertEquals(parent.left, a);
@@ -65,9 +65,9 @@ public class NodeTest {
         else if (etype.equals("i")) expected_expr = Expr.IntExpr;
 
         Binop binop = BinopConstants.get_by_string(op);
-        Node a = new Node(a_expr, "");
-        Node b = new Node(b_expr, "");
-        Node c = new Node(a, b, binop);
+        ExprNode a = new ExprNode(a_expr, "");
+        ExprNode b = new ExprNode(b_expr, "");
+        ExprNode c = new ExprNode(a, b, binop);
 
         assertEquals(c.type, expected_expr);
         assertEquals(c.left, a);

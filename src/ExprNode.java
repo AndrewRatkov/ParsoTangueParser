@@ -7,21 +7,21 @@ import java.util.Stack;
  * Вершина в дереве разбора выражения.
  * Имеет тип type, который показывает, что в
  * соответствующем поддереве задана строка,
- * целое число, или что-то ошибочное
+ * целое число, или что-то ошибочное.
  * (например, если в поддереве написано
  * "123" + 456, то это ошибка, так как нельзя
  * складывать числа со строками)
  */
 
-public class Node {
+public class ExprNode {
     public Expr type;
-    public Node left;
-    public Node right;
+    public ExprNode left;
+    public ExprNode right;
     public Binop binop;
     public String value;
 
 
-    public Node(Node left, Node right, Binop binop) {
+    public ExprNode(ExprNode left, ExprNode right, Binop binop) {
         this.value = null;
         this.left = left;
         this.right = right;
@@ -41,7 +41,7 @@ public class Node {
         }
     }
 
-    public Node(Expr type, String value) {
+    public ExprNode(Expr type, String value) {
         this.type = type;
         this.value = value;
         this.left = null;
@@ -49,26 +49,23 @@ public class Node {
         this.binop = null;
     }
 
-    public void print() {
-        System.out.println(type + " " + value + " " + left + " " + right + " " + binop);
-        if (left != null) left.print();
-        if (right != null) right.print();
-    }
-
     private String getStr() { // 8-char string representation of Node (GET_STR_LENGTH = 8)
         String res;
         if (this.type == Expr.IntExpr) res = "[INT,";
         else if (this.type == Expr.StringExpr) res = "[STR,";
         else res = "[ERR,";
+
         if (this.binop != null) {
             res += String.valueOf(this.binop.operator);
             if (res.length() == 6) res += " ";
         } else {
             res += this.value;
         }
+        
         res += "]";
         return res;
     }
+    
     private static int GET_STR_LENGTH = 8;
     
     private enum Move{ // used in buildTree method in tree graph traversal by dfs
@@ -85,22 +82,22 @@ public class Node {
 
         // for dfs:
         Stack<Move> moves = new Stack<>();
-        Stack<Node> cur_path_nodes = new Stack<>();
+        Stack<ExprNode> cur_path_nodes = new Stack<>();
         cur_path_nodes.push(this);
         moves.add(Move.LEFT);
 
         // for painting nodes I'll use (x, y) coordinates on R^2 for each of them
-        HashMap<Node, Integer > heights = new HashMap<>();
-        HashMap<Node, Integer > shifts = new HashMap<>();
+        HashMap<ExprNode, Integer > heights = new HashMap<>();
+        HashMap<ExprNode, Integer > shifts = new HashMap<>();
         heights.put(this, 0);
         shifts.put(this, 0);
         
-        Integer cur_height = 0;
-        Stack<Node> nodes_by_depth = new Stack<>(); // put here the nodes in such a way that parent nodes are topper [nodes are "sorted" by depth]
+        int cur_height = 0;
+        Stack<ExprNode> nodes_by_depth = new Stack<>(); // put here the nodes in such a way that parent nodes are topper [nodes are "sorted" by depth]
         
         while (!moves.empty()) {
             Move last_move = moves.getLast();
-            Node cur_node, prev_node = cur_path_nodes.peek();
+            ExprNode cur_node, prev_node = cur_path_nodes.peek();
             if (last_move == Move.LEFT) cur_node = prev_node.left;
             else {
                 cur_node = prev_node.right;
@@ -131,11 +128,11 @@ public class Node {
         String GO_LEFT = "------->";
 
         while (!nodes_by_depth.empty()) {
-            Node painting_node = nodes_by_depth.pop();
+            ExprNode painting_node = nodes_by_depth.pop();
             strings[heights.get(painting_node)] += painting_node.getStr();
             if (!painting_node.isLeaf()) {
                 strings[heights.get(painting_node)] += GO_LEFT;
-                Node right_node = painting_node.right;
+                ExprNode right_node = painting_node.right;
                 int h = heights.get(painting_node) + 1;
                 int cur_shift = shifts.get(painting_node) * (GET_STR_LENGTH + GO_LEFT.length()) + GET_STR_LENGTH / 2;
                 while (h < heights.get(right_node)) {
@@ -163,6 +160,5 @@ public class Node {
         }
         return res;
     }
-
     
 }
