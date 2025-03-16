@@ -22,7 +22,7 @@ import src.Binop;
 
 
 
-public class ParserTest {
+public class ExprParserTest {
     @Test
     void testRead() {
         ExprParser p = new ExprParser();

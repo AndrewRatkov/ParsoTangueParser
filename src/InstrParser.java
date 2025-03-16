@@ -21,7 +21,7 @@ public class InstrParser{
         this.expr_parser = new ExprParser();
     }
 
-    public InstrParser(HashSet<String> _Integers, HashSet<String> _Strings) {
+    public InstrParser(HashSet<String> _Integers, HashSet<String> _Strings) { 
         this.expr_parser = new ExprParser(_Integers, _Strings);
     }
 

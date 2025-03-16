@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Stack;
 
 /*
- * Вершина в дереве разбора выражения.
+ * Вершина в дереве разбора выражения (expression).
  * Имеет тип type, который показывает, что в
  * соответствующем поддереве задана строка,
  * целое число, или что-то ошибочное.
@@ -13,12 +13,13 @@ import java.util.Stack;
  * складывать числа со строками)
  */
 
-public class ExprNode {
+public class ExprNode implements Node {
     public Expr type;
     public ExprNode left;
     public ExprNode right;
     public Binop binop;
     public String value;
+    private String tree;
 
 
     public ExprNode(ExprNode left, ExprNode right, Binop binop) {
@@ -26,6 +27,7 @@ public class ExprNode {
         this.left = left;
         this.right = right;
         this.binop = binop;
+        this.tree  = null;
         if (left.type == Expr.ErrorExpr || right.type == Expr.ErrorExpr) {
             this.type = Expr.ErrorExpr;
         } else if (left.type == right.type && binop.priority == 0) { // == or != is ok for both strings and integers
@@ -47,6 +49,7 @@ public class ExprNode {
         this.left = null;
         this.right = null;
         this.binop = null;
+        this.tree = null;
     }
 
     private String getStr() { // 8-char string representation of Node (GET_STR_LENGTH = 8)
@@ -77,9 +80,11 @@ public class ExprNode {
         return this.left == null;
     }
 
-    public String buildTree() { // returns a string-formatted tree (see examples) 
-        if (this.isLeaf()) return getStr() + '\n';
-
+    public void buildTree() { // returns a string-formatted tree (see examples) 
+        if (this.isLeaf()) {
+            this.tree = getStr() + '\n';
+            return;
+        }
         // for dfs:
         Stack<Move> moves = new Stack<>();
         Stack<ExprNode> cur_path_nodes = new Stack<>();
@@ -158,7 +163,12 @@ public class ExprNode {
             }
             res += between + strings[i] + '\n';
         }
-        return res;
+        this.tree = res;
+    }
+
+    public String getTree() {
+        if (this.tree == null) buildTree();
+        return this.tree;
     }
     
 }

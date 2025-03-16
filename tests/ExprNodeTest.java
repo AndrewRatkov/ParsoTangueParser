@@ -11,7 +11,7 @@ import src.BinopConstants;
 import src.Binop;
 
 
-public class NodeTest {
+public class ExprNodeTest {
     @Test
     void defaultConstructorTest() {
         ExprNode n = new ExprNode(Expr.StringExpr, "hrundelair");

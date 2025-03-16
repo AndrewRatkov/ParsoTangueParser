@@ -9,18 +9,18 @@ import java.util.List;
 
 public class Main {
 
-    private static String readFile(String filename) throws IOException {
+    public static String readFile(String filename) throws IOException {
         StringBuilder content = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                content.append(line).append(System.lineSeparator());
+                content.append(line + '\n');
             }
         }
         return content.toString();
     }
 
-    private static void writeFile(String filename, String content) throws IOException {
+    public static void writeFile(String filename, String content) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             writer.write(content);
         }
@@ -42,7 +42,7 @@ public class Main {
             String tree = "";
             for (String instr : instructions) {
                 InstrNode root = parser.parseInstr(instr);
-                tree += root.buildTree() + '\n';    
+                tree += root.getTree() + '\n';    
             }
             writeFile(output, tree);
         } catch (IOException e) {

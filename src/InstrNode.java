@@ -1,9 +1,11 @@
 package src;
 
-public class InstrNode {
+
+public class InstrNode implements Node {
     public Expr type;
     public String var_name;
     public ExprNode expression;
+    private String tree;
 
     public InstrNode(Expr _type, String _var_name, ExprNode _expression) {
         this.type = _type;
@@ -11,12 +13,17 @@ public class InstrNode {
         this.expression = _expression;
     }
 
-    public String buildTree() {
+    public void buildTree() {
         String res = "[DEF " + (type == Expr.IntExpr ? "int" : "str") + " " + var_name + "]--->";
         String white_string = " ".repeat(res.length());
-        String[] node_tree = expression.buildTree().split("\n");
+        String[] node_tree = expression.getTree().split("\n");
         res += node_tree[0] + '\n';
         for (int i = 1; i < node_tree.length; ++i) res += white_string + node_tree[i] + "\n";
-        return res;
+        this.tree = res;
+    }
+
+    public String getTree() {
+        if (this.tree == null) buildTree();
+        return this.tree;
     }
 }
