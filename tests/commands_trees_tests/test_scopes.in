@@ -1,0 +1,7 @@
+int x := 12 + 18;
+int y := x + x;
+if x < y then
+str z := "Hello, World!";
+else
+int z := y - x;
+fi

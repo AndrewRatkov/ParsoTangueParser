@@ -1,0 +1,23 @@
+[DEF int x]--->[INT,+ ]------->[INT,12]
+                   |
+                   +---------->[INT,18]
+[DEF int y]--->[INT,+ ]------->[INT,x]
+                   |
+                   +---------->[INT,x]
+IF
+|
++--->[INT,< ]------->[INT,x]
+|        |
+|        +---------->[INT,y]
+|
+THEN
+|
++--->[DEF str z]--->[STR,"Hello, World!"]
+|
+ELSE
+|
++--->[DEF int z]--->[INT,- ]------->[INT,y]
+|                       |
+|                       +---------->[INT,x]
+|
+FI

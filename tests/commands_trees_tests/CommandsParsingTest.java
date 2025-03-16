@@ -39,7 +39,8 @@ public class CommandsParsingTest {
         "test_only_if",
         "test_if_with_else",
         "test_example",
-        "bad_brackets",
+        "bad_brackets", // с неправильной скобочной последовательностью
+        "test_scopes", // на области видимости: в непересекающихся областях объявляется переменная с одним и тем же именем, но разным типом
     })
     void commandsParserOKTests(String test_name) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");
