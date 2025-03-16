@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -270,4 +271,10 @@ public class ExprParserTest {
         assertTrue(p.parseExpr("60*t==(3>2)*(z!=z)").type == Expr.ErrorExpr);
     }
 
+    @Test
+    void testParseEmptyString() {
+        ExprParser p = new ExprParser();
+        ExprNode n = p.parseExpr("");
+        assertEquals(n.type, Expr.ErrorExpr);
+    }
 }

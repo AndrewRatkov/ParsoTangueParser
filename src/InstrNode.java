@@ -14,6 +14,10 @@ public class InstrNode implements Node {
     }
 
     public void buildTree() {
+        if (this.type == Expr.ErrorExpr) {
+            this.tree = "[ERR " + var_name + "]\n";
+            return;
+        }
         String res = "[DEF " + (type == Expr.IntExpr ? "int" : "str") + " " + var_name + "]--->";
         String white_string = " ".repeat(res.length());
         String[] node_tree = expression.getTree().split("\n");

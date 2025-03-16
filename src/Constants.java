@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Constants{
     public static final List<String> TYPE_NAMES = Arrays.asList("int", "str");
-    public static final List<String> KEYWORDS = Arrays.asList("int", "str");
+    public static final List<String> KEYWORDS = Arrays.asList("int", "str", "fi", "if", "then", "else");
     public static final String WHITESPACES = " \t\r\n";
     
     private static final Map<String, Expr> type_by_str = new HashMap<>();

@@ -1,4 +1,4 @@
-package src;
+package src.structs;
 import java.util.Objects;
 
 /* Класс, чтобы можно было заводить пары */
@@ -26,7 +26,6 @@ public class Pair<K, V> {
 
     @Override
     public boolean equals(Object o) {
-        System.err.println("comparing..");
         if (o == this) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Pair<?, ?> pair = (Pair<?, ?>) o;

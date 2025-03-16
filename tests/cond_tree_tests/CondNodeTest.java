@@ -2,10 +2,8 @@ package tests.cond_tree_tests;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -21,16 +19,6 @@ import src.Node;
 public class CondNodeTest {
     private String PATH = "tests/cond_tree_tests/";
 
-    private String get_str_from_file(String filename) {
-        try {
-            return Main.readFile(PATH + filename);
-        } catch (IOException e) {
-            System.err.println("Error: " + e.getMessage());
-            assertTrue(false);
-            System.exit(1);
-        }
-        return "";
-    }
 
     @Test
     void getTreeTest1() { // basic if-then-else-fi expression
@@ -49,7 +37,7 @@ public class CondNodeTest {
         else_nodes.add(ip.parseInstr("s := \"Andrew Ratkov\";"));
 
         CondNode cond_node = new CondNode(expr_node, then_nodes, else_nodes);
-        String expected = get_str_from_file("cond_node_test1.txt");
+        String expected = Main.get_str_from_file(PATH + "cond_node_test1.txt");
         assertEquals(cond_node.getTree(), expected);
     }
 
@@ -64,7 +52,7 @@ public class CondNodeTest {
         then_nodes.add(ip.parseInstr("x := x - x;"));
 
         CondNode cond_node = new CondNode(expr_node, then_nodes, null);
-        String expected = get_str_from_file("cond_node_test2.txt");
+        String expected = Main.get_str_from_file(PATH + "cond_node_test2.txt");
         assertEquals(cond_node.getTree(), expected);
     }
 
@@ -92,7 +80,7 @@ public class CondNodeTest {
         then_out_nodes.add(cond_node_in);
         CondNode cond_node_out = new CondNode(expr_node_out, then_out_nodes, else_out_nodes);
 
-        String expected = get_str_from_file("cond_node_test3.txt");
+        String expected = Main.get_str_from_file(PATH + "cond_node_test3.txt");
         assertEquals(cond_node_out.getTree(), expected);
     }
 }

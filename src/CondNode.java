@@ -14,6 +14,10 @@ public class CondNode implements Node {
         this.else_nodes = _else_nodes;
     }
 
+    public Expr exprStmt() {
+        return stmt.type;
+    }
+
     public void buildTree() {
         String shift = "+--->";
         String skip = "|" + " ".repeat(shift.length() - 1);

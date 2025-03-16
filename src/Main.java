@@ -20,6 +20,16 @@ public class Main {
         return content.toString();
     }
 
+    public static String get_str_from_file(String filename) {
+        try {
+            return Main.readFile(filename);
+        } catch (IOException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.exit(1);
+            return "";
+        }
+    }
+
     public static void writeFile(String filename, String content) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
             writer.write(content);

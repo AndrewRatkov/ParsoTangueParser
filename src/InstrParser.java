@@ -14,19 +14,39 @@ import java.util.HashSet;
  * При этом запрещаем переменной x менять тип (то есть если она была типа str,
  * а Expression задает целое число, то это ошибка)
  */
-public class InstrParser{
+public class InstrParser implements Cloneable {
     private ExprParser expr_parser;
 
     public InstrParser() {
         this.expr_parser = new ExprParser();
     }
 
+    public ExprParser getExprParser() {
+        return this.expr_parser;
+    }
+
     public InstrParser(HashSet<String> _Integers, HashSet<String> _Strings) { 
         this.expr_parser = new ExprParser(_Integers, _Strings);
     }
 
+    public InstrParser(ExprParser ep) {
+        this.expr_parser = ep;
+    } 
+
+    public InstrParser(InstrParser ip) {
+        this.expr_parser = ip.expr_parser;
+    }
+    
+    @Override
+    public Object clone() {
+        InstrParser inp = new InstrParser();
+        inp.expr_parser = this.expr_parser.clone();
+        return inp; 
+    }
+
+
     public InstrNode parseInstr(String str) {
-        if (!str.endsWith(";")) { // instruction must end with 
+        if (!str.endsWith(";")) { // instruction must end with ;
             return new InstrNode(Expr.ErrorExpr, "Instruction must end with \";\"", null);
         }
 

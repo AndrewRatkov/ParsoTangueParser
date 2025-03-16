@@ -1,0 +1,9 @@
+IF
+|
++--->[ERR,Empty expression]
+|
+THEN
+|
++--->[DEF int x]--->[INT,1]
+|
+FI

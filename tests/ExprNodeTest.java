@@ -51,7 +51,7 @@ public class ExprNodeTest {
         "s,s,!=,i",
         "i,i,>,i"
     })
-    void FromTwoConstructorTest2(String atype, String btype, String op, String etype) {
+    void fromTwoConstructorTest2(String atype, String btype, String op, String etype) {
         Expr a_expr = Expr.ErrorExpr;
         if (atype.equals("s")) a_expr = Expr.StringExpr;
         else if (atype.equals("i")) a_expr = Expr.IntExpr;
@@ -73,5 +73,5 @@ public class ExprNodeTest {
         assertEquals(c.left, a);
         assertEquals(c.right, b);
         assertEquals(c.binop, binop);
-    } 
+    }
 }

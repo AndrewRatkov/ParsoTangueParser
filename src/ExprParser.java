@@ -4,13 +4,15 @@ import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
 
+import src.structs.Pair;
+
 /*
  * Объект этого класса умеет парсить выражения --
  * то есть получать на вход строку из арифметических операций над числами/строками,
  * и строить для неё дерево разбора.
  * Затем это дерево разбора можно напечатать в файл, например
 */
-public class ExprParser{
+public class ExprParser implements Cloneable {
     public HashSet<String> Integers;
     public HashSet<String> Strings;
 
@@ -23,6 +25,15 @@ public class ExprParser{
         this.Integers = _Integers;
         this.Strings = _Strings;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ExprParser clone() {
+        ExprParser new_parser = new ExprParser();
+        if (Integers != null) new_parser.Integers = (HashSet<String>)Integers.clone();
+        if (Strings != null) new_parser.Strings = (HashSet<String>)Strings.clone();
+        return new_parser; 
+    } 
 
 
     public Pair<ReaderResponses, Integer> read(char[] str, int idx) {
@@ -230,6 +241,9 @@ public class ExprParser{
             p = read(char_array, idx);
         }
         //System.out.println(p);
+        if (nodes.empty()) {
+            return new ExprNode(Expr.ErrorExpr, "Empty expression");
+        }
         return parsePrimaryExpr(nodes, binops, nodes.size());
     } 
 }
