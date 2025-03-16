@@ -39,6 +39,7 @@ public class CommandsParsingTest {
         "test_only_if",
         "test_if_with_else",
         "test_example",
+        "bad_brackets",
     })
     void commandsParserOKTests(String test_name) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");

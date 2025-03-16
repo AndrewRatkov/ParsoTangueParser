@@ -156,8 +156,8 @@ public class Parser implements Cloneable {
                 ++used_quotes;
                 in_string = !in_string;
             }
-            else if (c == '(' && in_string) ++opened_brackets;
-            else if (c == ')' && in_string) {
+            else if (c == '(' && !in_string) ++opened_brackets;
+            else if (c == ')' && !in_string) {
                 if (opened_brackets == 0) {
                     correct_brackets_sequence = false;
                     break;
@@ -327,8 +327,8 @@ public class Parser implements Cloneable {
         if (type_declared) type_of_expr_expected = Constants.get_type(first_word);
         else type_of_expr_expected = (Integers.contains(var_name) ? Expr.IntExpr : Expr.StringExpr);
 
-        if (expr.type != type_of_expr_expected) {   
-            return new InstrNode(Expr.ErrorExpr, "Expression cannot be not parsed with expected type", null);
+        if (expr.type != type_of_expr_expected) {
+            return new InstrNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.type, null);
         }
 
         if (type_declared) {
