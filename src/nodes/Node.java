@@ -1,4 +1,4 @@
-package src;
+package src.nodes;
 
 public interface Node {
     public void buildTree();

@@ -14,19 +14,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-import src.ExprParser;
-import src.ReaderResponses;
-import src.BinopConstants;
-import src.Expr;
-import src.ExprNode;
-import src.Binop;
+import src.Parser;
+import src.consts.Binop;
+import src.consts.BinopConstants;
+import src.consts.Expr;
+import src.consts.ReaderResponses;
+import src.nodes.ExprNode;
 
 
 
-public class ExprParserTest {
+public class ExpressionParsingTest {
     @Test
     void testRead() {
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
 
         assertTrue(p.read("123".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 3));
         assertTrue(p.read("12 3".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 2));
@@ -142,7 +142,7 @@ public class ExprParserTest {
               +-------+--+
                       |
         */
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
@@ -181,7 +181,7 @@ public class ExprParserTest {
                   +---+--+
                       |
         */
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
@@ -211,7 +211,7 @@ public class ExprParserTest {
             st_binops.push(BinopConstants.SUB);
         }
 
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, LEN);
         
         String s = "";
@@ -231,7 +231,7 @@ public class ExprParserTest {
         "(1 == 2) < 3"
     })
     void testParseExpr(String expr) {
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode root = p.parseExpr(expr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
@@ -248,7 +248,7 @@ public class ExprParserTest {
         "(1 == 2) < \"3\""
     })
     void testParseExpr2(String expr) {
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode root = p.parseExpr(expr);
         assertTrue(root.type == Expr.ErrorExpr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
@@ -262,7 +262,7 @@ public class ExprParserTest {
 
     @Test
     void testParseExprWithVariables() {
-        ExprParser p = new ExprParser(new HashSet<String>(Arrays.asList("x", "y")),
+        Parser p = new Parser(new HashSet<String>(Arrays.asList("x", "y")),
                               new HashSet<String>(Arrays.asList("z", "t")));
 
         assertTrue(p.parseExpr("(x+y)>=(z==t)").type == Expr.IntExpr);
@@ -273,7 +273,7 @@ public class ExprParserTest {
 
     @Test
     void testParseEmptyString() {
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode n = p.parseExpr("");
         assertEquals(n.type, Expr.ErrorExpr);
     }

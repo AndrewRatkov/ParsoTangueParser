@@ -1,6 +1,8 @@
-package src;
+package src.nodes;
 
 import java.util.List;
+
+import src.consts.Expr;
 
 public class CondNode implements Node {
     private String tree;

@@ -1,28 +1,28 @@
 package tests.commands_trees_tests;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.Assert.assertEquals;
 
-import src.CommandsParser;
-import src.CondNode;
-import src.Expr;
+
+import src.Parser;
 import src.Main;
-import src.Node;
-import src.TextReaderResponses;
+import src.consts.Expr;
+import src.consts.TextReaderResponses;
+import src.nodes.CondNode;
+import src.nodes.Node;
 import src.structs.Pair;
 
 
-public class CommandsParserTest {
+public class CommandsParsingTest {
     private String PATH = "tests/commands_trees_tests/";
 
     @Test
     public void noStatementTest() { // условия нет, но всё остальное есть, и поэтому случится частичный разбор
-        CommandsParser cp = new CommandsParser();
+        Parser cp = new Parser();
 
         Pair<TextReaderResponses, List<Node>> nodes = cp.parseCondition("if then int x := 1; fi");
         assertEquals(nodes.first(), TextReaderResponses.OK);
@@ -38,11 +38,12 @@ public class CommandsParserTest {
     @CsvSource({
         "test_only_if",
         "test_if_with_else",
+        "test_example",
     })
     void commandsParserOKTests(String test_name) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");
         
-        CommandsParser cp = new CommandsParser();
+        Parser cp = new Parser();
         Pair<TextReaderResponses, List<Node>> nodes_info = cp.parseCondition(cmds);
 
         assertEquals(nodes_info.first(), TextReaderResponses.OK);

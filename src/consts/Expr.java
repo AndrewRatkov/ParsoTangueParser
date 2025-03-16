@@ -1,4 +1,4 @@
-package src;
+package src.consts;
 
 public enum Expr {
     StringExpr,

@@ -8,12 +8,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import src.CondNode;
-import src.ExprNode;
 import src.Main;
-import src.ExprParser;
-import src.InstrParser;
-import src.Node;
+import src.Parser;
+import src.nodes.CondNode;
+import src.nodes.ExprNode;
+import src.nodes.Node;
 
 
 public class CondNodeTest {
@@ -22,13 +21,13 @@ public class CondNodeTest {
 
     @Test
     void getTreeTest1() { // basic if-then-else-fi expression
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode expr_node = p.parseExpr("1+2*(\"aba\"==\"a\"+\"ba\")");
         
         HashSet<String> ints_before = new HashSet<>(), strs_before = new HashSet<>();
         strs_before.add("s");
 
-        InstrParser ip = new InstrParser(ints_before, strs_before);
+        Parser ip = new Parser(ints_before, strs_before);
         
         List<Node> then_nodes = new ArrayList<>(), else_nodes = new ArrayList<>();
 
@@ -43,11 +42,11 @@ public class CondNodeTest {
 
     @Test
     void getTreeTest2() { // basic if-then-fi expression
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode expr_node = p.parseExpr("2+2==4");
 
         List<Node> then_nodes = new ArrayList<>();
-        InstrParser ip = new InstrParser();
+        Parser ip = new Parser();
         then_nodes.add(ip.parseInstr("int x := (1+2)*3;"));
         then_nodes.add(ip.parseInstr("x := x - x;"));
 
@@ -58,7 +57,7 @@ public class CondNodeTest {
 
     @Test
     void getTreeTest3() { // nested if expressions
-        ExprParser p = new ExprParser();
+        Parser p = new Parser();
         ExprNode expr_node_out = p.parseExpr("1+(2>1)==5");
         ExprNode expr_node_in = p.parseExpr("1==\"1\"");
 
@@ -66,7 +65,7 @@ public class CondNodeTest {
         HashSet<String> ints_before = new HashSet<>(), strs_before = new HashSet<>();
         ints_before.add("x");
         ints_before.add("y");
-        InstrParser ip = new InstrParser(ints_before, strs_before);
+        Parser ip = new Parser(ints_before, strs_before);
 
         then_in_nodes.add(ip.parseInstr("x := 1+2;"));
         then_in_nodes.add(ip.parseInstr("x := x - 3;"));

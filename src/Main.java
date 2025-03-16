@@ -1,11 +1,17 @@
 package src;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+
+import src.consts.TextReaderResponses;
+import src.nodes.Node;
+import src.structs.Pair;
 
 public class Main {
 
@@ -44,21 +50,22 @@ public class Main {
         }
 
         String input = args[0], output = args[1];
-        InstrParser parser = new InstrParser();
+        Parser parser = new Parser();
 
+        String cmds = get_str_from_file(input);
+        Pair<TextReaderResponses, List<Node>> nodes_info = parser.parseCondition(cmds);
+        
+        assertEquals(nodes_info.first(), TextReaderResponses.OK);
+        String answer = "";
+        for (Node n : nodes_info.second()) {
+            answer += n.getTree();
+        }
+        
         try {
-            String text = readFile(input);
-            List<String> instructions = InstructionSplitter.splitText(text);
-            String tree = "";
-            for (String instr : instructions) {
-                InstrNode root = parser.parseInstr(instr);
-                tree += root.getTree() + '\n';    
-            }
-            writeFile(output, tree);
+            Main.writeFile(output, answer);
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);
         }
-
     }
 }

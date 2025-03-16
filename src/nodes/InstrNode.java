@@ -1,5 +1,6 @@
-package src;
+package src.nodes;
 
+import src.consts.Expr;
 
 public class InstrNode implements Node {
     public Expr type;

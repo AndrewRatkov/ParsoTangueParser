@@ -1,7 +1,11 @@
-package src;
+package src.nodes;
 
 import java.util.HashMap;
 import java.util.Stack;
+
+import src.consts.Binop;
+import src.consts.BinopConstants;
+import src.consts.Expr;
 
 /*
  * Вершина в дереве разбора выражения (expression).
