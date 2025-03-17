@@ -1,0 +1,6 @@
+int x := 15;
+int y := 90;
+if x > y then
+else
+x := y;
+fi

@@ -1,0 +1,15 @@
+[DEF int x]--->[INT,15]
+[DEF int y]--->[INT,90]
+IF
+|
++--->[INT,> ]------->[INT,x]
+|        |
+|        +---------->[INT,y]
+|
+THEN
+|
+ELSE
+|
++--->[DEF int x]--->[INT,y]
+|
+FI
