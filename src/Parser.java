@@ -8,7 +8,7 @@ import src.consts.Binop;
 import src.consts.BinopConstants;
 import src.consts.Constants;
 import src.consts.Expr;
-import src.consts.ReaderResponses;
+import src.consts.ExprReaderResponses;
 import src.consts.TextReaderResponses;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
@@ -45,51 +45,51 @@ public class Parser implements Cloneable {
     } 
 
     /* читает следующий токен в арифметическом выражении */
-    public Pair<ReaderResponses, Integer> read(char[] str, int idx) {
+    public Pair<ExprReaderResponses, Integer> read(char[] str, int idx) {
         if (idx >= str.length) {
-            return new Pair<>(ReaderResponses.FINISHED_READING, -1);
+            return new Pair<>(ExprReaderResponses.FINISHED_READING, -1);
         } else if (Character.isWhitespace(str[idx])) {
             while (idx < str.length && Character.isWhitespace(str[idx])) ++idx;
-            return new Pair<>(ReaderResponses.SKIPPED, idx);
+            return new Pair<>(ExprReaderResponses.SKIPPED, idx);
         } else if (str[idx] == '(') {
-            return new Pair<>(ReaderResponses.OPENNING_BRACKET, idx + 1);
+            return new Pair<>(ExprReaderResponses.OPENNING_BRACKET, idx + 1);
         } else if (str[idx] == ')') {
-            return new Pair<>(ReaderResponses.CLOSING_BRACKET, idx + 1);
+            return new Pair<>(ExprReaderResponses.CLOSING_BRACKET, idx + 1);
         } else if (BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1) {
             if (idx + 1 == str.length || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx + 1]) == -1) {
                 if (BinopConstants.SHORT_BINOPS.indexOf(str[idx]) != -1) {
-                    return new Pair<>(ReaderResponses.READ_BINOP, idx + 1);
+                    return new Pair<>(ExprReaderResponses.READ_BINOP, idx + 1);
                 } else {
-                    return new Pair<>(ReaderResponses.ERROR_UNKNOWN_CHAR, idx + 1);
+                    return new Pair<>(ExprReaderResponses.ERROR_UNKNOWN_CHAR, idx + 1);
                 }
             } else {
                 if (BinopConstants.LONG_BINOPS.contains("" + str[idx] + str[idx + 1])) {
-                    return new Pair<>(ReaderResponses.READ_BINOP, idx + 2);
+                    return new Pair<>(ExprReaderResponses.READ_BINOP, idx + 2);
                 } else {
-                    return new Pair<>(ReaderResponses.ERROR_UNKNOWN_CHAR, idx + 1);
+                    return new Pair<>(ExprReaderResponses.ERROR_UNKNOWN_CHAR, idx + 1);
                 }
             }
         } else if (Character.isDigit(str[idx])) { // reading an integer
             while (idx < str.length && Character.isDigit(str[idx])) ++idx;
             if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
-                return new Pair<>(ReaderResponses.READ_INTEGER, idx);
+                return new Pair<>(ExprReaderResponses.READ_INTEGER, idx);
             } else {
-                return new Pair<>(ReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, idx);
+                return new Pair<>(ExprReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, idx);
             }
         } else if (str[idx] == '\"') {
             ++idx;
             while (idx < str.length && str[idx] != '\"') ++idx;
-            if (idx == str.length) return new Pair<>(ReaderResponses.ERROR_STRING_DOESNT_END, idx);
-            return new Pair<>(ReaderResponses.READ_STRING, idx + 1);
+            if (idx == str.length) return new Pair<>(ExprReaderResponses.ERROR_STRING_DOESNT_END, idx);
+            return new Pair<>(ExprReaderResponses.READ_STRING, idx + 1);
         } else if (Character.isLetter(str[idx])){ // reading a variable
             while (idx < str.length && Character.isLetterOrDigit(str[idx])) ++idx;
             if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
-                return new Pair<>(ReaderResponses.READ_VARIABLE, idx);
+                return new Pair<>(ExprReaderResponses.READ_VARIABLE, idx);
             } else {
-                return new Pair<>(ReaderResponses.ERROR_AFTER_VARIABLE, idx);
+                return new Pair<>(ExprReaderResponses.ERROR_AFTER_VARIABLE, idx);
             }
         } else {
-            return new Pair<>(ReaderResponses.ERROR_UNKNOWN_CHAR, idx);
+            return new Pair<>(ExprReaderResponses.ERROR_UNKNOWN_CHAR, idx);
         }
     }
 
@@ -174,21 +174,21 @@ public class Parser implements Cloneable {
         Stack<ExprNode> nodes = new Stack<>();
         Stack<Binop> binops = new Stack<>();
 
-        Pair<ReaderResponses, Integer> p = read(char_array, idx);
-        while (p.first() != ReaderResponses.FINISHED_READING) {
+        Pair<ExprReaderResponses, Integer> p = read(char_array, idx);
+        while (p.first() != ExprReaderResponses.FINISHED_READING) {
             switch (p.first()) {
-                case ERROR_AFTER_VARIABLE:
+                case ExprReaderResponses.ERROR_AFTER_VARIABLE:
                     return new ExprNode(Expr.ErrorExpr, "Character " + char_array[p.second()] + " after variable name");
-                case ERROR_UNKNOWN_CHAR:
+                case ExprReaderResponses.ERROR_UNKNOWN_CHAR:
                     return new ExprNode(Expr.ErrorExpr, "Unknown character " + char_array[idx]);
-                case ERROR_VAR_STARTS_WITH_DIGITS:
+                case ExprReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS:
                     return new ExprNode(Expr.ErrorExpr, "Variable starts with digits");
-                case OPENNING_BRACKET:
+                case ExprReaderResponses.OPENNING_BRACKET:
                     openning_brackets.push(nodes.size());
                     break;
-                case SKIPPED:
+                case ExprReaderResponses.SKIPPED:
                     break;
-                case READ_BINOP:
+                case ExprReaderResponses.READ_BINOP:
                     if (expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Expected value, got binop");
                     } else {
@@ -197,7 +197,7 @@ public class Parser implements Cloneable {
                         expected_a_value = true;
                         break;
                     }
-                case READ_INTEGER:
+                case ExprReaderResponses.READ_INTEGER:
                     if (!expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
@@ -206,7 +206,7 @@ public class Parser implements Cloneable {
                         expected_a_value = false;
                         break;
                     }
-                case READ_STRING:
+                case ExprReaderResponses.READ_STRING:
                     if (!expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
@@ -215,7 +215,7 @@ public class Parser implements Cloneable {
                         expected_a_value = false;
                         break;
                     }
-                case READ_VARIABLE:
+                case ExprReaderResponses.READ_VARIABLE:
                     if (!expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
                     } else {
@@ -232,7 +232,7 @@ public class Parser implements Cloneable {
                         expected_a_value = false;
                         break;
                     }
-                case CLOSING_BRACKET:
+                case ExprReaderResponses.CLOSING_BRACKET:
                     if (expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Got ')' after a binary operator, expected a value");
                     } 
@@ -240,9 +240,9 @@ public class Parser implements Cloneable {
                     ExprNode new_node = parsePrimaryExpr(nodes, binops, nodes.size() - last_openning_bracket);
                     nodes.push(new_node);
                     break;
-                case FINISHED_READING:
+                case ExprReaderResponses.FINISHED_READING:
                     break;
-                case ERROR_STRING_DOESNT_END:
+                case ExprReaderResponses.ERROR_STRING_DOESNT_END:
                     break;
                 default:
                     break;
@@ -414,11 +414,11 @@ public class Parser implements Cloneable {
                     if (else_node_lists.peek() != null) {
                         return new Pair<>(TextReaderResponses.DOUBLE_ELSE, result);
                     } else {
-                        else_node_lists.pop();
-                        else_node_lists.push(new ArrayList<>());
+                        else_node_lists.pop(); // pop the null
+                        else_node_lists.push(new ArrayList<>()); // add new array list instead of it
                         parsers.pop();
                         if (parsers.empty()) parsers.push(clone());
-                        else parsers.push(parsers.peek().clone()); 
+                        else parsers.push(parsers.peek().clone());
                     }
                     continue;
                 }
@@ -430,6 +430,7 @@ public class Parser implements Cloneable {
                     return new Pair<>(TextReaderResponses.EXTRA_FI, result);
                 } else {
                     idx = skip_fi;
+                    parsers.pop();
                     CondNode cond = new CondNode(stmts.pop(), then_node_lists.pop(), else_node_lists.pop());
                     if (stmts.empty()) result.add(cond);
                     else if (else_node_lists.peek() == null) then_node_lists.peek().add(cond);

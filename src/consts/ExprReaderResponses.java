@@ -1,6 +1,6 @@
 package src.consts;
 
-public enum ReaderResponses {
+public enum ExprReaderResponses {
     FINISHED_READING,
     SKIPPED,
     OPENNING_BRACKET,

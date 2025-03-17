@@ -41,6 +41,7 @@ public class CommandsParsingTest {
         "test_example",
         "bad_brackets", // с неправильной скобочной последовательностью
         "test_scopes", // на области видимости: в непересекающихся областях объявляется переменная с одним и тем же именем, но разным типом
+        "test_scopes_an_nested_ifs", // то же самое
     })
     void commandsParserOKTests(String test_name) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");

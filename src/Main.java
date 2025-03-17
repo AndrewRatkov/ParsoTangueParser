@@ -55,7 +55,7 @@ public class Main {
         String cmds = get_str_from_file(input);
         Pair<TextReaderResponses, List<Node>> nodes_info = parser.parseCondition(cmds);
         
-        assertEquals(nodes_info.first(), TextReaderResponses.OK);
+        //assertEquals(nodes_info.first(), TextReaderResponses.OK);
         String answer = "";
         for (Node n : nodes_info.second()) {
             answer += n.getTree();

@@ -18,7 +18,7 @@ import src.Parser;
 import src.consts.Binop;
 import src.consts.BinopConstants;
 import src.consts.Expr;
-import src.consts.ReaderResponses;
+import src.consts.ExprReaderResponses;
 import src.nodes.ExprNode;
 
 
@@ -28,51 +28,51 @@ public class ExpressionParsingTest {
     void testRead() {
         Parser p = new Parser();
 
-        assertTrue(p.read("123".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 3));
-        assertTrue(p.read("12 3".toCharArray(), 0).isSame(ReaderResponses.READ_INTEGER, 2));
-        assertTrue(p.read("1+2==3".toCharArray(), 2).isSame(ReaderResponses.READ_INTEGER, 3));
-        assertTrue(p.read("1+2-303030==3".toCharArray(), 4).isSame(ReaderResponses.READ_INTEGER, 10));
+        assertTrue(p.read("123".toCharArray(), 0).isSame(ExprReaderResponses.READ_INTEGER, 3));
+        assertTrue(p.read("12 3".toCharArray(), 0).isSame(ExprReaderResponses.READ_INTEGER, 2));
+        assertTrue(p.read("1+2==3".toCharArray(), 2).isSame(ExprReaderResponses.READ_INTEGER, 3));
+        assertTrue(p.read("1+2-303030==3".toCharArray(), 4).isSame(ExprReaderResponses.READ_INTEGER, 10));
 
-        assertTrue(p.read("12 3".toCharArray(), 2).isSame(ReaderResponses.SKIPPED, 3));
-        assertTrue(p.read("12  6".toCharArray(), 2).isSame(ReaderResponses.SKIPPED, 4));
-        assertTrue(p.read("12   6".toCharArray(), 2).isSame(ReaderResponses.SKIPPED, 5));
-        assertTrue(p.read("12   6".toCharArray(), 3).isSame(ReaderResponses.SKIPPED, 5));
+        assertTrue(p.read("12 3".toCharArray(), 2).isSame(ExprReaderResponses.SKIPPED, 3));
+        assertTrue(p.read("12  6".toCharArray(), 2).isSame(ExprReaderResponses.SKIPPED, 4));
+        assertTrue(p.read("12   6".toCharArray(), 2).isSame(ExprReaderResponses.SKIPPED, 5));
+        assertTrue(p.read("12   6".toCharArray(), 3).isSame(ExprReaderResponses.SKIPPED, 5));
 
-        assertTrue(p.read("dewdewd".toCharArray(), 7).isSame(ReaderResponses.FINISHED_READING, -1));
-        assertTrue(p.read("1+2=3".toCharArray(), 10).isSame(ReaderResponses.FINISHED_READING, -1));
+        assertTrue(p.read("dewdewd".toCharArray(), 7).isSame(ExprReaderResponses.FINISHED_READING, -1));
+        assertTrue(p.read("1+2=3".toCharArray(), 10).isSame(ExprReaderResponses.FINISHED_READING, -1));
         
-        assertTrue(p.read("1+(2==3)==1".toCharArray(), 2).isSame(ReaderResponses.OPENNING_BRACKET, 3));
-        assertTrue(p.read("1+((2)==3)==1".toCharArray(), 2).isSame(ReaderResponses.OPENNING_BRACKET, 3));
+        assertTrue(p.read("1+(2==3)==1".toCharArray(), 2).isSame(ExprReaderResponses.OPENNING_BRACKET, 3));
+        assertTrue(p.read("1+((2)==3)==1".toCharArray(), 2).isSame(ExprReaderResponses.OPENNING_BRACKET, 3));
 
-        assertTrue(p.read("1+(2==3)==1".toCharArray(), 7).isSame(ReaderResponses.CLOSING_BRACKET, 8));
-        assertTrue(p.read("1+((2)==(3))==1".toCharArray(), 10).isSame(ReaderResponses.CLOSING_BRACKET, 11));
+        assertTrue(p.read("1+(2==3)==1".toCharArray(), 7).isSame(ExprReaderResponses.CLOSING_BRACKET, 8));
+        assertTrue(p.read("1+((2)==(3))==1".toCharArray(), 10).isSame(ExprReaderResponses.CLOSING_BRACKET, 11));
 
-        assertTrue(p.read("43?".toCharArray(), 2).isSame(ReaderResponses.ERROR_UNKNOWN_CHAR, 2));
-        assertTrue(p.read("4@78".toCharArray(), 1).isSame(ReaderResponses.ERROR_UNKNOWN_CHAR, 1));
+        assertTrue(p.read("43?".toCharArray(), 2).isSame(ExprReaderResponses.ERROR_UNKNOWN_CHAR, 2));
+        assertTrue(p.read("4@78".toCharArray(), 1).isSame(ExprReaderResponses.ERROR_UNKNOWN_CHAR, 1));
 
-        assertTrue(p.read("2 + a2hgf == 4".toCharArray(), 4).isSame(ReaderResponses.READ_VARIABLE, 9));
-        assertTrue(p.read("(bhdeb - abcdef12345ghi)".toCharArray(), 9).isSame(ReaderResponses.READ_VARIABLE,23));
+        assertTrue(p.read("2 + a2hgf == 4".toCharArray(), 4).isSame(ExprReaderResponses.READ_VARIABLE, 9));
+        assertTrue(p.read("(bhdeb - abcdef12345ghi)".toCharArray(), 9).isSame(ExprReaderResponses.READ_VARIABLE,23));
 
-        assertTrue(p.read("2 + ab3def(3+3)".toCharArray(), 4).isSame(ReaderResponses.ERROR_AFTER_VARIABLE, 10));
-        assertTrue(p.read("2 + ab3def~3 + 3".toCharArray(), 4).isSame(ReaderResponses.ERROR_AFTER_VARIABLE, 10));
+        assertTrue(p.read("2 + ab3def(3+3)".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_AFTER_VARIABLE, 10));
+        assertTrue(p.read("2 + ab3def~3 + 3".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_AFTER_VARIABLE, 10));
 
-        assertTrue(p.read("9 * \"cucu\"".toCharArray(), 4).isSame(ReaderResponses.READ_STRING, 10));
-        assertTrue(p.read("9 * \"cucu\" + \"meme\"".toCharArray(), 4).isSame(ReaderResponses.READ_STRING, 10));
+        assertTrue(p.read("9 * \"cucu\"".toCharArray(), 4).isSame(ExprReaderResponses.READ_STRING, 10));
+        assertTrue(p.read("9 * \"cucu\" + \"meme\"".toCharArray(), 4).isSame(ExprReaderResponses.READ_STRING, 10));
 
-        assertTrue(p.read("9 * \"abracadabra".toCharArray(), 4).isSame(ReaderResponses.ERROR_STRING_DOESNT_END, 16));
+        assertTrue(p.read("9 * \"abracadabra".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_STRING_DOESNT_END, 16));
 
-        assertTrue(p.read("9cucu + 4 == 13".toCharArray(), 0).isSame(ReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, 1));
-        assertTrue(p.read("1 + 2e0 == 3".toCharArray(), 4).isSame(ReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, 5));
+        assertTrue(p.read("9cucu + 4 == 13".toCharArray(), 0).isSame(ExprReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, 1));
+        assertTrue(p.read("1 + 2e0 == 3".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_VAR_STARTS_WITH_DIGITS, 5));
 
-        assertTrue(p.read("10%3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 3));
-        assertTrue(p.read("10+3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 3));
-        assertTrue(p.read("10/3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 3));
-        assertTrue(p.read("10==3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 4));
-        assertTrue(p.read("10>=3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 4));
-        assertTrue(p.read("10!=3==1".toCharArray(), 2).isSame(ReaderResponses.READ_BINOP, 4));
+        assertTrue(p.read("10%3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 3));
+        assertTrue(p.read("10+3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 3));
+        assertTrue(p.read("10/3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 3));
+        assertTrue(p.read("10==3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 4));
+        assertTrue(p.read("10>=3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 4));
+        assertTrue(p.read("10!=3==1".toCharArray(), 2).isSame(ExprReaderResponses.READ_BINOP, 4));
         
-        assertTrue(p.read("10=!3==1".toCharArray(), 2).isSame(ReaderResponses.ERROR_UNKNOWN_CHAR, 3));
-        assertTrue(p.read("10!3==1".toCharArray(), 2).isSame(ReaderResponses.ERROR_UNKNOWN_CHAR, 3));
+        assertTrue(p.read("10=!3==1".toCharArray(), 2).isSame(ExprReaderResponses.ERROR_UNKNOWN_CHAR, 3));
+        assertTrue(p.read("10!3==1".toCharArray(), 2).isSame(ExprReaderResponses.ERROR_UNKNOWN_CHAR, 3));
     }
 
     private boolean goToChild(ExprNode node, String path, String expected_val) {
