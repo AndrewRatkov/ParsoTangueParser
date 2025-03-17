@@ -346,7 +346,7 @@ public class Parser implements Cloneable {
         return idx + keyword.length();
     }
 
-    public Pair<TextReaderResponses, List<Node>> parseCondition(String str) {
+    public Pair<TextReaderResponses, List<Node>> parseCommands(String str) {
         char[] char_array = str.trim().toCharArray();
         int len = char_array.length;
         if (len == 0) return new Pair<>(TextReaderResponses.OK, new ArrayList<>()); // empty 
@@ -461,8 +461,9 @@ public class Parser implements Cloneable {
             }
         }
 
+        if (!stmts.empty()) return new Pair<>(TextReaderResponses.NOT_CLOSED_IF, result); 
 
-        return new Pair<TextReaderResponses,List<Node>>(TextReaderResponses.OK, result);
+        return new Pair<>(TextReaderResponses.OK, result);
     }
 
 }

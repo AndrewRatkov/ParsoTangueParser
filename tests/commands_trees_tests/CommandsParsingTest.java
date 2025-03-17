@@ -24,7 +24,7 @@ public class CommandsParsingTest {
     public void noStatementTest() { // условия нет, но всё остальное есть, и поэтому случится частичный разбор
         Parser cp = new Parser();
 
-        Pair<TextReaderResponses, List<Node>> nodes = cp.parseCondition("if then int x := 1; fi");
+        Pair<TextReaderResponses, List<Node>> nodes = cp.parseCommands("if then int x := 1; fi");
         assertEquals(nodes.first(), TextReaderResponses.OK);
         assertEquals(nodes.second().size(), 1);
 
@@ -42,13 +42,14 @@ public class CommandsParsingTest {
         "bad_brackets", // с неправильной скобочной последовательностью
         "test_scopes", // на области видимости: в непересекающихся областях объявляется переменная с одним и тем же именем, но разным типом
         "test_scopes_and_nested_ifs", // то же самое
-        "test_empty_then" // после then до else (или до fi) 0  инструкций -- это ок
+        "test_empty_then", // после then до else (или до fi) 0  инструкций -- это ок
+        "test_file_with_errors", // файл с пустым statement'ом и инвалидной инструкцией. но парсер всё равно постоит дерево разбора с пометками ошибочных вершин
     })
     void commandsParserOKTests(String test_name) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");
         
         Parser cp = new Parser();
-        Pair<TextReaderResponses, List<Node>> nodes_info = cp.parseCondition(cmds);
+        Pair<TextReaderResponses, List<Node>> nodes_info = cp.parseCommands(cmds);
 
         assertEquals(nodes_info.first(), TextReaderResponses.OK);
         String answer = "";
@@ -58,5 +59,20 @@ public class CommandsParsingTest {
 
         assertEquals(answer, Main.get_str_from_file(PATH + test_name + ".out"));
     }
+
+    @ParameterizedTest
+    @CsvSource({
+        "test_err_1,NOT_CLOSED_IF",
+        "test_err_2,NOTHING_AFTER_THEN",
+        "test_err_3,"
+    })
+    void commandsParsingErrorsTest(String test_name, TextReaderResponses response) {
+        String cmds = Main.get_str_from_file(PATH + test_name + ".in");
+        Parser cp = new Parser();
+        Pair<TextReaderResponses, List<Node>> nodes_info = cp.parseCommands(cmds);
+        assertEquals(nodes_info.first(), response);
+    }
+
+
 
 }

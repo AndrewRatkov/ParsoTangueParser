@@ -8,5 +8,6 @@ public enum TextReaderResponses {
     NOTHING_AFTER_ELSE,
     DOUBLE_ELSE,
     EXTRA_FI,
-    ENDING_NOT_PARSED
+    ENDING_NOT_PARSED,
+    NOT_CLOSED_IF,
 }

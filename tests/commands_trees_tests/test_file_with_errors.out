@@ -1,0 +1,9 @@
+IF
+|
++--->[ERR,Empty expression]
+|
+THEN
+|
++--->[ERR Variable should have been initialized before]
+|
+FI

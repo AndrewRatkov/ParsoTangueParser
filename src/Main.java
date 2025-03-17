@@ -53,9 +53,9 @@ public class Main {
         Parser parser = new Parser();
 
         String cmds = get_str_from_file(input);
-        Pair<TextReaderResponses, List<Node>> nodes_info = parser.parseCondition(cmds);
+        Pair<TextReaderResponses, List<Node>> nodes_info = parser.parseCommands(cmds);
         
-        //assertEquals(nodes_info.first(), TextReaderResponses.OK);
+        //System.out.println(nodes_info.first());
         String answer = "";
         for (Node n : nodes_info.second()) {
             answer += n.getTree();
