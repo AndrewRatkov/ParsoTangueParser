@@ -1,8 +1,8 @@
 package src;
-import java.util.HashSet;
 import java.util.Stack;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import src.consts.Binop;
 import src.consts.BinopConstants;
@@ -10,6 +10,7 @@ import src.consts.Constants;
 import src.consts.Expr;
 import src.consts.ExprReaderResponses;
 import src.consts.TextReaderResponses;
+import src.consts.Types;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
 import src.nodes.InstrNode;
@@ -18,29 +19,27 @@ import src.structs.Pair;
 
 /*
  * Объект этого класса умеет парсить разные штуки:
- * арифметические выражения, инструкции присваивания, условные выражения --
+ * арифметические выражения, инструкции присваивания, условные выражения, функции --
  * и возвращать соответствующие Nod'ы
 */
 public class Parser implements Cloneable {
-    public HashSet<String> Integers;
-    public HashSet<String> Strings;
+    // todo private boolean return_instructions_allowed; // если парсим внутренность функций -- добавляется возможность парсить инструкции вида: return Expr;
+
+    public HashMap<String, Types> Variables;
 
     public Parser() {
-        this.Integers = new HashSet<>();
-        this.Strings = new HashSet<>();
+        this.Variables = new HashMap<>();
     }
 
-    public Parser(HashSet<String> _Integers, HashSet<String> _Strings) {
-        this.Integers = _Integers;
-        this.Strings = _Strings;
+    public Parser(HashMap<String, Types> _Variables) {
+        this.Variables = _Variables;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Parser clone() {
         Parser new_parser = new Parser();
-        if (Integers != null) new_parser.Integers = (HashSet<String>)Integers.clone();
-        if (Strings != null) new_parser.Strings = (HashSet<String>)Strings.clone();
+        if (Variables != null) new_parser.Variables = (HashMap<String, Types>)Variables.clone();
         return new_parser; 
     } 
 
@@ -221,9 +220,9 @@ public class Parser implements Cloneable {
                     } else {
                         String var_name = String.copyValueOf(char_array, idx, p.second() - idx);
                         ExprNode new_node;
-                        if (Integers.contains(var_name)) {
+                        if (Variables.get(var_name) == Types.INTEGER) {
                             new_node = new ExprNode(Expr.IntExpr, var_name);
-                        } else if (Strings.contains(var_name)) {
+                        } else if (Variables.get(var_name) == Types.STRING) {
                             new_node = new ExprNode(Expr.StringExpr, var_name);
                         } else {
                             return new ExprNode(Expr.ErrorExpr, "Unknown variable");
@@ -292,7 +291,7 @@ public class Parser implements Cloneable {
         String var_name = "";
         if (!type_declared) { // 2nd case: x := Expression;
             var_name = first_word;
-            if ((!Integers.contains(var_name)) && (!Strings.contains(var_name))) {
+            if (Variables.get(var_name) == null) {
                 return new InstrNode(Expr.ErrorExpr, "Variable should have been initialized before", null);
             }
         } else { // 1st case: Type x := expression;
@@ -309,7 +308,7 @@ public class Parser implements Cloneable {
                 return new InstrNode(Expr.ErrorExpr, "Variable name cannot be a type name", null);
             }
 
-            if (Integers.contains(var_name) || Strings.contains(var_name)) {
+            if (Variables.get(var_name) != null) {
                 return new InstrNode(Expr.ErrorExpr, "Variable was initialized before", null);
             }
         }
@@ -325,15 +324,15 @@ public class Parser implements Cloneable {
 
         Expr type_of_expr_expected;
         if (type_declared) type_of_expr_expected = Constants.get_type(first_word);
-        else type_of_expr_expected = (Integers.contains(var_name) ? Expr.IntExpr : Expr.StringExpr);
+        else type_of_expr_expected = (Variables.get(var_name) == Types.INTEGER ? Expr.IntExpr : Expr.StringExpr);
 
         if (expr.type != type_of_expr_expected) {
             return new InstrNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.type, null);
         }
 
         if (type_declared) {
-            if (type_of_expr_expected == Expr.IntExpr) Integers.add(var_name);
-            else Strings.add(var_name);
+            if (type_of_expr_expected == Expr.IntExpr) Variables.put(var_name, Types.INTEGER);
+            else Variables.put(var_name, Types.STRING);
         }
         
         return new InstrNode(type_of_expr_expected, var_name, expr);

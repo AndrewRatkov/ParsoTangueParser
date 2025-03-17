@@ -4,12 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import src.Parser;
 import src.consts.Expr;
+import src.consts.Types;
 import src.nodes.InstrNode;
 
 
@@ -34,7 +33,7 @@ public class InstructionParsingTest {
     @Test
     void testErrors2() {
         Parser p = new Parser();
-        assertFalse(p.Integers.contains("x"));
+        assertEquals(p.Variables.get("x"), null);
         InstrNode n1 = p.parseInstr("int x:=30;");
         assertEquals(n1.type, Expr.IntExpr);
         assertEquals(n1.var_name, "x");
@@ -45,6 +44,6 @@ public class InstructionParsingTest {
         assertEquals(p.parseInstr("x := \"23\";").type, Expr.ErrorExpr); // type must be int
         assertEquals(p.parseInstr("x := x * \"abacaba\";").type, Expr.ErrorExpr); // type must be int
         assertEquals(p.parseInstr("x := x + x * x;").type, Expr.IntExpr); // OK
-        assertTrue(p.Integers.contains("x"));
+        assertEquals(p.Variables.get("x"), Types.INTEGER);
     }
 }

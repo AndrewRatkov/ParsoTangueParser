@@ -1,8 +1,7 @@
 package tests;
 
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
@@ -19,6 +18,7 @@ import src.consts.Binop;
 import src.consts.BinopConstants;
 import src.consts.Expr;
 import src.consts.ExprReaderResponses;
+import src.consts.Types;
 import src.nodes.ExprNode;
 
 
@@ -262,8 +262,14 @@ public class ExpressionParsingTest {
 
     @Test
     void testParseExprWithVariables() {
-        Parser p = new Parser(new HashSet<String>(Arrays.asList("x", "y")),
-                              new HashSet<String>(Arrays.asList("z", "t")));
+
+        HashMap<String, Types> vars_before = new HashMap<String, Types>(){{
+            put("x", Types.INTEGER);
+            put("y", Types.INTEGER);
+            put("z", Types.STRING);
+            put("t", Types.STRING);
+        }};
+        Parser p = new Parser(vars_before);
 
         assertTrue(p.parseExpr("(x+y)>=(z==t)").type == Expr.IntExpr);
         assertTrue(p.parseExpr("x*z+30*t==z*(t==t)").type == Expr.IntExpr);

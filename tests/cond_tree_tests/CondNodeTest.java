@@ -5,11 +5,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 
 import src.Main;
 import src.Parser;
+import src.consts.Types;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
 import src.nodes.Node;
@@ -24,10 +25,10 @@ public class CondNodeTest {
         Parser p = new Parser();
         ExprNode expr_node = p.parseExpr("1+2*(\"aba\"==\"a\"+\"ba\")");
         
-        HashSet<String> ints_before = new HashSet<>(), strs_before = new HashSet<>();
-        strs_before.add("s");
+        HashMap<String, Types> vars_before = new HashMap<>();
+        vars_before.put("s", Types.STRING);
 
-        Parser ip = new Parser(ints_before, strs_before);
+        Parser ip = new Parser(vars_before);
         
         List<Node> then_nodes = new ArrayList<>(), else_nodes = new ArrayList<>();
 
@@ -62,10 +63,11 @@ public class CondNodeTest {
         ExprNode expr_node_in = p.parseExpr("1==\"1\"");
 
         List<Node> then_in_nodes = new ArrayList<>(), else_in_nodes = new ArrayList<>();
-        HashSet<String> ints_before = new HashSet<>(), strs_before = new HashSet<>();
-        ints_before.add("x");
-        ints_before.add("y");
-        Parser ip = new Parser(ints_before, strs_before);
+        HashMap<String, Types> vars_before = new HashMap<>();
+        vars_before.put("x", Types.INTEGER);
+        vars_before.put("y", Types.INTEGER);
+
+        Parser ip = new Parser(vars_before);
 
         then_in_nodes.add(ip.parseInstr("x := 1+2;"));
         then_in_nodes.add(ip.parseInstr("x := x - 3;"));
