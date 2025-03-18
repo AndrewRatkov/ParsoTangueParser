@@ -63,7 +63,8 @@ public class CommandsParsingTest {
     @CsvSource({
         "test_err_1,NOT_CLOSED_IF",
         "test_err_2,NOTHING_AFTER_THEN",
-        "test_err_3,"
+        "test_err_3,DOUBLE_ELSE",
+        "test_err_4,EXTRA_FI",
     })
     void commandsParsingErrorsTest(String test_name, TextReaderResponses response) {
         String cmds = Main.get_str_from_file(PATH + test_name + ".in");

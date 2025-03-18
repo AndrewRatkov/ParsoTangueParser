@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import src.Parser;
 import src.consts.Expr;
-import src.consts.Types;
+import src.consts.Type;
 import src.nodes.InstrNode;
 
 
@@ -44,6 +44,6 @@ public class InstructionParsingTest {
         assertEquals(p.parseInstr("x := \"23\";").type, Expr.ErrorExpr); // type must be int
         assertEquals(p.parseInstr("x := x * \"abacaba\";").type, Expr.ErrorExpr); // type must be int
         assertEquals(p.parseInstr("x := x + x * x;").type, Expr.IntExpr); // OK
-        assertEquals(p.Variables.get("x"), Types.INTEGER);
+        assertEquals(p.Variables.get("x"), Type.INTEGER);
     }
 }

@@ -33,7 +33,7 @@ public class ExprNodeTest {
         assertEquals(parent.right, b);
         assertEquals(parent.binop, BinopConstants.ADD);
         assertEquals(parent.value, null);
-        assertEquals(parent.left.value, "30");
+        assertEquals(((ExprNode)parent.left).value, "30");
     }
 
     @ParameterizedTest

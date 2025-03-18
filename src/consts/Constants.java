@@ -16,7 +16,18 @@ public class Constants{
         type_by_str.put("str", Expr.StringExpr);
     }
 
-    public static Expr get_type(String s) {
+    public static Expr get_expr(String s) {
         return type_by_str.get(s);
+    }
+
+    public static Expr get_expr_from_type(Type t) {
+        if (t == Type.INTEGER) return Expr.IntExpr;
+        else return Expr.StringExpr;
+    }
+
+    public static Expr get_expr_from_function_return_type(FunctionReturnType t) {
+        if (t == FunctionReturnType.INT) return Expr.IntExpr;
+        else if ((t == FunctionReturnType.STR)) return Expr.StringExpr;
+        return Expr.ErrorExpr;
     }
 };

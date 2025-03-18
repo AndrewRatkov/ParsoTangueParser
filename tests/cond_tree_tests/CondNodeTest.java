@@ -10,7 +10,7 @@ import java.util.List;
 
 import src.Main;
 import src.Parser;
-import src.consts.Types;
+import src.consts.Type;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
 import src.nodes.Node;
@@ -25,8 +25,8 @@ public class CondNodeTest {
         Parser p = new Parser();
         ExprNode expr_node = p.parseExpr("1+2*(\"aba\"==\"a\"+\"ba\")");
         
-        HashMap<String, Types> vars_before = new HashMap<>();
-        vars_before.put("s", Types.STRING);
+        HashMap<String, Type> vars_before = new HashMap<>();
+        vars_before.put("s", Type.STRING);
 
         Parser ip = new Parser(vars_before);
         
@@ -63,9 +63,9 @@ public class CondNodeTest {
         ExprNode expr_node_in = p.parseExpr("1==\"1\"");
 
         List<Node> then_in_nodes = new ArrayList<>(), else_in_nodes = new ArrayList<>();
-        HashMap<String, Types> vars_before = new HashMap<>();
-        vars_before.put("x", Types.INTEGER);
-        vars_before.put("y", Types.INTEGER);
+        HashMap<String, Type> vars_before = new HashMap<>();
+        vars_before.put("x", Type.INTEGER);
+        vars_before.put("y", Type.INTEGER);
 
         Parser ip = new Parser(vars_before);
 

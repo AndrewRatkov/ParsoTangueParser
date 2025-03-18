@@ -2,7 +2,9 @@ package src.nodes;
 
 import src.consts.Binop;
 import src.consts.BinopConstants;
+import src.consts.Constants;
 import src.consts.Expr;
+import src.consts.FunctionReturnType;
 
 /*
  * Вершина в дереве разбора выражения (expression).
@@ -16,26 +18,49 @@ import src.consts.Expr;
 
 public class ExprNode implements Node {
     public Expr type;
-    public ExprNode left;
-    public ExprNode right;
+    public Node left;
+    public Node right;
     public Binop binop;
     public String value;
     private String tree;
 
 
-    public ExprNode(ExprNode left, ExprNode right, Binop binop) {
+    public ExprNode(Node left, Node right, Binop binop) {
         this.value = null;
+        Expr left_type;
+        if (left instanceof ExprNode) {
+            left_type = ((ExprNode)left).type;
+        } else if (left instanceof FunNode && ((FunNode)left).func.output_type != FunctionReturnType.VOID) {
+            left_type = Constants.get_expr_from_function_return_type(((FunNode)left).func.output_type);
+        } else {
+            type = Expr.ErrorExpr;
+            value = "Cannot apply binop not to non-void functions or other expressions";
+            return;
+        }
+
+        Expr right_type;
+        if (right instanceof ExprNode) {
+            right_type = ((ExprNode)right).type;
+        } else if (right instanceof FunNode && ((FunNode)right).func.output_type != FunctionReturnType.VOID) {
+            right_type = Constants.get_expr_from_function_return_type(((FunNode)right).func.output_type);
+        } else {
+            type = Expr.ErrorExpr;
+            value = "Cannot apply binop not to non-void functions or other expressions";
+            return;
+        }
+
+
         this.left = left;
         this.right = right;
         this.binop = binop;
         this.tree  = null;
-        if (left.type == Expr.ErrorExpr || right.type == Expr.ErrorExpr) {
+        if (left_type == Expr.ErrorExpr || right_type == Expr.ErrorExpr) {
             this.type = Expr.ErrorExpr;
-        } else if (left.type == right.type && binop.priority == 0) { // == or != is ok for both strings and integers
+        } else if (left_type == right_type && binop.priority == 0) { // == or != is ok for both strings and integers
             this.type = Expr.IntExpr;
-        } else if (left.type == Expr.IntExpr && right.type == Expr.IntExpr) {
+        } else if (left_type == Expr.IntExpr && right_type == Expr.IntExpr) {
             this.type = Expr.IntExpr;
-        } else if (left.type == Expr.StringExpr && right.type == Expr.StringExpr) {
+        } else if (left_type == Expr.StringExpr && right_type == Expr.StringExpr) {
             if (binop == BinopConstants.ADD) this.type = Expr.StringExpr; // can only add strings
             else this.type = Expr.ErrorExpr;
         } else {

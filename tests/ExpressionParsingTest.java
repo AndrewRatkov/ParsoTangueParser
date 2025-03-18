@@ -18,7 +18,7 @@ import src.consts.Binop;
 import src.consts.BinopConstants;
 import src.consts.Expr;
 import src.consts.ExprReaderResponses;
-import src.consts.Types;
+import src.consts.Type;
 import src.nodes.ExprNode;
 
 
@@ -81,10 +81,10 @@ public class ExpressionParsingTest {
         for (char c : path.toCharArray()) {
             if (c == 'L') {
                 if (cur_node.left == null) return false;
-                cur_node = cur_node.left;
+                cur_node = (ExprNode)cur_node.left;
             } else if (c == 'R') {
                 if (cur_node.right == null) return false;
-                cur_node = cur_node.right;
+                cur_node = (ExprNode)cur_node.right;
             } else {
                 return false;
             }
@@ -99,10 +99,10 @@ public class ExpressionParsingTest {
         for (char c : path.toCharArray()) {
             if (c == 'L') {
                 if (cur_node.left == null) return false;
-                cur_node = cur_node.left;
+                cur_node = (ExprNode)cur_node.left;
             } else if (c == 'R') {
                 if (cur_node.right == null) return false;
-                cur_node = cur_node.right;
+                cur_node = (ExprNode)cur_node.right;
             } else {
                 return false;
             }
@@ -253,9 +253,9 @@ public class ExpressionParsingTest {
         assertTrue(root.type == Expr.ErrorExpr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
-        assertTrue(root.right.type == Expr.StringExpr);
+        assertTrue(((ExprNode)root.right).type == Expr.StringExpr);
         assertTrue(goToChild(root, "R", "\"3\""));
-        assertTrue(root.left.type == Expr.IntExpr);
+        assertTrue(((ExprNode)root.left).type == Expr.IntExpr);
         assertTrue(goToChild(root, "LR", "2"));
         assertTrue(goToChild(root, "LL", "1"));
     }
@@ -263,11 +263,11 @@ public class ExpressionParsingTest {
     @Test
     void testParseExprWithVariables() {
 
-        HashMap<String, Types> vars_before = new HashMap<String, Types>(){{
-            put("x", Types.INTEGER);
-            put("y", Types.INTEGER);
-            put("z", Types.STRING);
-            put("t", Types.STRING);
+        HashMap<String, Type> vars_before = new HashMap<String, Type>(){{
+            put("x", Type.INTEGER);
+            put("y", Type.INTEGER);
+            put("z", Type.STRING);
+            put("t", Type.STRING);
         }};
         Parser p = new Parser(vars_before);
 

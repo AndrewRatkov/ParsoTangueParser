@@ -1,6 +1,6 @@
 package src.consts;
 
-public enum Types {
+public enum Type {
     INTEGER,
-    STRING
+    STRING,
 }
