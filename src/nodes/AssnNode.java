@@ -1,31 +1,37 @@
 package src.nodes;
 
-import src.consts.FunctionReturnType;
-import src.consts.Constants;
+import src.consts.Expr;
 
-public class RetNode implements InstrNode {
+public class AssnNode implements InstrNode {
+    private Expr type;
+    private String var_name;
     private ExprOrCallNode expression;
     private String tree;
 
-    public RetNode(ExprOrCallNode _expression) {
-        this.expression = _expression;
+    public Expr getType() {
+        return this.type;
     }
 
     public ExprOrCallNode getExpression() {
         return this.expression;
     }
 
-    public FunctionReturnType returnType() {
-        if (expression instanceof FunNode) return ((FunNode)expression).getFunc().output_type;
-        return Constants.get_function_return_type_from_expr(expression.getType());
+    public String getVarname() {
+        return this.var_name;
     }
-    
+
+    public AssnNode(Expr _type, String _var_name, ExprOrCallNode _expression) {
+        this.type = _type;
+        this.var_name = _var_name;
+        this.expression = _expression;
+    }
+
     public void buildTree() {
-        if (expression == null) {
-            this.tree = "[RETURN]\n";
+        if (this.type == Expr.ErrorExpr) {
+            this.tree = "[ERR " + var_name + "]\n";
             return;
         }
-        this.tree = "[RETURN]--->";
+        this.tree = "[DEF " + (type == Expr.IntExpr ? "int" : "str") + " " + var_name + "]--->";
         String white_string = " ".repeat(this.tree.length());
         String[] node_tree = this.expression.getTree().split("\n");
         this.tree += node_tree[0] + '\n';

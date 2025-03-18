@@ -1,5 +1,7 @@
 package src.nodes;
 
+import src.consts.Expr;
+
 // я его сделал, чтобы от него наследовались только ExprNode и FunNode
 // потому что только эти Node'ы формируют что-то меньшее, чем инструкция,
 // и каждый из них может содержать другого в качестве ребёнка,
@@ -8,4 +10,5 @@ package src.nodes;
 // а проверять, что в эти структуры попали какие-то другие объекты с интерфейсом Node,
 // везде не хочется
 public interface ExprOrCallNode extends Node {
+    public Expr getType();
 }

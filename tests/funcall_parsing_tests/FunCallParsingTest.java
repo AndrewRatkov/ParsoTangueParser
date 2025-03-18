@@ -2,6 +2,7 @@ package tests.funcall_parsing_tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -42,6 +43,8 @@ public class FunCallParsingTest {
         Parser p = new Parser(null, hm);
         String call = Main.get_str_from_file(PATH + test_name + ".in");
         FunNode n = p.parseFunCall(call);
+        System.err.println(n.getTree());
+        System.err.println(Main.get_str_from_file(PATH + test_name + ".out"));
         assertEquals(n.getTree(), Main.get_str_from_file(PATH + test_name + ".out"));
     }
 }

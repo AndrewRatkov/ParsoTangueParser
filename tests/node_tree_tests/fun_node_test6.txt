@@ -1,1 +1,1 @@
-[VOID justFun]
+[CALL VOID justFun]

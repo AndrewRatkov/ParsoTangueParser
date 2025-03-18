@@ -1,1 +1,1 @@
-[INT f]------->{incorrect number of parameters: expected 1,  got 0}
+[CALL INT f]------->{incorrect number of parameters: expected 1,  got 0}

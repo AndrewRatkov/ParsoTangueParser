@@ -1,1 +1,1 @@
-[INT f]------->[INT f]------->[INT,1]
+[CALL INT f]------->[CALL INT f]------->[INT,1]

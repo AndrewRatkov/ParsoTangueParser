@@ -10,14 +10,18 @@ import src.consts.Constants;
 import src.consts.Expr;
 import src.consts.ExprReaderResponses;
 import src.consts.FunctionInfo;
+import src.consts.FunctionReturnType;
 import src.consts.TextReaderResponses;
 import src.consts.Type;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
 import src.nodes.ExprOrCallNode;
 import src.nodes.FunNode;
+import src.nodes.InstrFunCallNode;
 import src.nodes.InstrNode;
+import src.nodes.AssnNode;
 import src.nodes.Node;
+import src.nodes.RetNode;
 import src.structs.Pair;
 
 /*
@@ -30,6 +34,8 @@ public class Parser implements Cloneable {
 
     public HashMap<String, Type> Variables;
     public HashMap<String, FunctionInfo> Functions;
+    private boolean accepts_return_instructions = false;
+    private FunctionReturnType ret_type;
 
     public Parser() {
         this.Variables = new HashMap<>();
@@ -42,6 +48,11 @@ public class Parser implements Cloneable {
     public Parser(HashMap<String, Type> _Variables, HashMap<String, FunctionInfo> _Functions) {
         this.Variables = _Variables;
         this.Functions = _Functions;
+    }
+
+    public void enableReturnInstructions(FunctionReturnType _ret_type) {
+        accepts_return_instructions = true;
+        ret_type = _ret_type;
     }
 
     @SuppressWarnings("unchecked")
@@ -371,14 +382,41 @@ public class Parser implements Cloneable {
     */
     public InstrNode parseInstr(String str) {
         if (!str.endsWith(";")) { // instruction must end with ;
-            return new InstrNode(Expr.ErrorExpr, "Instruction must end with \";\"", null);
+            return new AssnNode(Expr.ErrorExpr, "Instruction must end with \";\"", null);
+        }
+
+        String ret = "return";
+        if (str.startsWith(ret) && Character.isWhitespace(str.charAt(ret.length()))) {
+            if (!accepts_return_instructions) {
+                return new RetNode(new ExprNode(Expr.ErrorExpr, "cannot return"));
+            }
+            if (ret_type == FunctionReturnType.VOID) {
+                for (char c : str.substring(ret.length() + 1, str.length() - 1).toCharArray()) {
+                    if (!Character.isWhitespace(c)) return new RetNode(new ExprNode(Expr.ErrorExpr, "cannot return anything when void"));
+                }
+                return new RetNode(null);
+            }
+            ExprOrCallNode inner_node = parseExpr(str.substring(ret.length() + 1, str.length() - 1));
+            RetNode ret_node = new RetNode(inner_node);
+            if (ret_node.getExpression() instanceof FunNode && ((FunNode)ret_node.getExpression()).getFunc().output_type == FunctionReturnType.VOID) {
+                return new RetNode(new ExprNode(Expr.ErrorExpr, "return type cannot be void"));
+            }
+            if (ret_node.returnType() != ret_type) {
+                return new RetNode(new ExprNode(Expr.ErrorExpr, "return type mismatch"));
+            }
+
+            return ret_node;
+        }
+
+        if (funcPrefSkip(str.substring(0, str.length() - 1).toCharArray()) != -1) {
+            return new InstrFunCallNode(parseFunCall(str.substring(0, str.length() - 1)));
         }
 
         int idx = 0;
         char[] char_array = str.toCharArray();
         while (Character.isWhitespace(char_array[idx])) ++idx;
         if (!Character.isLetter(char_array[idx])) {
-            return new InstrNode(Expr.ErrorExpr, "Instruction cannot start with not a letter", null);
+            return new AssnNode(Expr.ErrorExpr, "Instruction cannot start with not a letter", null);
         }
 
         String first_word = "";
@@ -392,12 +430,12 @@ public class Parser implements Cloneable {
         if (!type_declared) { // 2nd case: x := Expression;
             var_name = first_word;
             if (Variables.get(var_name) == null) {
-                return new InstrNode(Expr.ErrorExpr, "Variable should have been initialized before", null);
+                return new AssnNode(Expr.ErrorExpr, "Variable should have been initialized before", null);
             }
         } else { // 1st case: Type x := expression;
             while (Character.isWhitespace(char_array[idx])) ++idx;
             if (!Character.isLetter(char_array[idx])) {
-                return new InstrNode(Expr.ErrorExpr, "Variable name cannot start with not a letter", null);
+                return new AssnNode(Expr.ErrorExpr, "Variable name cannot start with not a letter", null);
             }
             while (Character.isLetterOrDigit(char_array[idx])) {
                 var_name += char_array[idx];
@@ -405,41 +443,45 @@ public class Parser implements Cloneable {
             }
 
             if (Constants.TYPE_NAMES.contains(var_name)) {
-                return new InstrNode(Expr.ErrorExpr, "Variable name cannot be a type name", null);
+                return new AssnNode(Expr.ErrorExpr, "Variable name cannot be a type name", null);
             }
 
             if (Variables.get(var_name) != null) {
-                return new InstrNode(Expr.ErrorExpr, "Variable was initialized before", null);
+                return new AssnNode(Expr.ErrorExpr, "Variable was initialized before", null);
             }
         }
 
         while (Character.isWhitespace(char_array[idx])) ++idx;
         if (char_array[idx] != ':' || char_array[idx + 1] != '=') {
-            return new InstrNode(Expr.ErrorExpr, "Expected :=, but not found", null);
+            return new AssnNode(Expr.ErrorExpr, "Expected :=, but not found", null);
         }
         idx += 2;
 
         String expression = new String(char_array, idx, char_array.length - idx - 1);
-        ExprNode expr = parseExpr(expression);
-
+        ExprOrCallNode expr;
+        if (funcPrefSkip(expression.toCharArray()) != -1) {
+            expr = parseFunCall(expression);
+        } else {
+            expr = parseExpr(expression);
+        }
         Expr type_of_expr_expected;
         if (type_declared) type_of_expr_expected = Constants.get_expr(first_word);
         else type_of_expr_expected = (Variables.get(var_name) == Type.INTEGER ? Expr.IntExpr : Expr.StringExpr);
 
         if (expr.getType() != type_of_expr_expected) {
-            return new InstrNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.getType(), null);
+            return new AssnNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.getType(), null);
         }
 
         if (type_declared) {
             if (Functions != null && Functions.get(var_name) != null) {
-                return new InstrNode(Expr.ErrorExpr, var_name + " is a function", null);
+                return new AssnNode(Expr.ErrorExpr, var_name + " is a function", null);
             }
             if (Variables == null) Variables = new HashMap<>();
             if (type_of_expr_expected == Expr.IntExpr) Variables.put(var_name, Type.INTEGER);
             else Variables.put(var_name, Type.STRING);
         }
         
-        return new InstrNode(type_of_expr_expected, var_name, expr);
+        return new AssnNode(type_of_expr_expected, var_name, expr);
     }
 
     private int skipWord(char[] char_array, int idx, String keyword) {

@@ -23,6 +23,19 @@ public class FunNode implements ExprOrCallNode {
         message = error;
     }
 
+    public Expr getType() {
+        switch (func.output_type) {
+            case FunctionReturnType.INT:
+                return Expr.IntExpr;
+            case FunctionReturnType.STR:
+                return Expr.StringExpr;
+            case FunctionReturnType.VOID:
+                return Expr.ErrorExpr;
+            default:
+                return Expr.ErrorExpr;
+        }
+    }
+
     public FunNode(FunctionInfo _func, List<ExprOrCallNode> _params) {
         func = _func;
         params = _params;
@@ -58,8 +71,8 @@ public class FunNode implements ExprOrCallNode {
     }
 
     public void buildTree() {
-        if (func != null) tree = "[" + func.output_type + ' ' + func.name + "]";
-        else tree = "[ERR]";
+        if (func != null) tree = "[CALL " + func.output_type + ' ' + func.name + "]";
+        else tree = "[ERROR FUNCTION NOT DEFINED]";
         String GO_LEFT = "------->";
         if (!valid) {
             tree += GO_LEFT + "{" + message + "}\n";

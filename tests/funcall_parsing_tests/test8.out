@@ -1,1 +1,1 @@
-[VOID h]------->{incorrect argument 1: expected StringExpr, got IntExpr}
+[CALL VOID h]------->{incorrect argument 1: expected StringExpr, got IntExpr}

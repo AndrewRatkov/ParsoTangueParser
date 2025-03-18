@@ -1,1 +1,1 @@
-[VOID outFun]------->[INT inFun]
+[CALL VOID outFun]------->[CALL INT inFun]
