@@ -56,7 +56,6 @@ public class CommandsParsingTest {
         for (Node n : nodes_info.second()) {
             answer += n.getTree();
         }
-
         assertEquals(answer, Main.get_str_from_file(PATH + test_name + ".out"));
     }
 
