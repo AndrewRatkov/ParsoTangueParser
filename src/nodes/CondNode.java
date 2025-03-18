@@ -2,22 +2,21 @@ package src.nodes;
 
 import java.util.List;
 
-import src.consts.Expr;
 
 public class CondNode implements Node {
     private String tree;
-    private ExprNode stmt;
+    private ExprOrCallNode stmt;
     private List<Node> then_nodes;
     private List<Node> else_nodes;
     
-    public CondNode(ExprNode _stmt, List<Node> _then_nodes, List<Node> _else_nodes) {
+    public CondNode(ExprOrCallNode _stmt, List<Node> _then_nodes, List<Node> _else_nodes) {
         this.stmt = _stmt;
         this.then_nodes = _then_nodes;
         this.else_nodes = _else_nodes;
     }
 
-    public Expr exprStmt() {
-        return stmt.type;
+    public ExprOrCallNode getStmt() {
+        return stmt;
     }
 
     public void buildTree() {

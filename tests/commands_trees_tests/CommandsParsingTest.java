@@ -13,6 +13,7 @@ import src.Main;
 import src.consts.Expr;
 import src.consts.TextReaderResponses;
 import src.nodes.CondNode;
+import src.nodes.ExprNode;
 import src.nodes.Node;
 import src.structs.Pair;
 
@@ -29,7 +30,7 @@ public class CommandsParsingTest {
         assertEquals(nodes.second().size(), 1);
 
         CondNode n = (CondNode) nodes.second().getFirst();
-        assertEquals(n.exprStmt(), Expr.ErrorExpr);
+        assertEquals(((ExprNode)n.getStmt()).getType(), Expr.ErrorExpr);
         assertEquals(n.getTree(), Main.get_str_from_file(PATH + "no_statement_test.txt"));
     }
 

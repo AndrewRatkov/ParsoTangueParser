@@ -3,10 +3,22 @@ package src.nodes;
 import src.consts.Expr;
 
 public class InstrNode implements Node {
-    public Expr type;
-    public String var_name;
-    public ExprNode expression;
+    private Expr type;
+    private String var_name;
+    private ExprOrCallNode expression;
     private String tree;
+
+    public Expr getType() {
+        return this.type;
+    }
+
+    public ExprOrCallNode getExpression() {
+        return this.expression;
+    }
+
+    public String getVarname() {
+        return this.var_name;
+    }
 
     public InstrNode(Expr _type, String _var_name, ExprNode _expression) {
         this.type = _type;

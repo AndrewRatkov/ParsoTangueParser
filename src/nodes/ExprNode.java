@@ -16,39 +16,37 @@ import src.consts.FunctionReturnType;
  * складывать числа со строками)
  */
 
-public class ExprNode implements Node {
-    public Expr type;
-    public Node left;
-    public Node right;
-    public Binop binop;
-    public String value;
+public class ExprNode implements ExprOrCallNode {
+    private Expr type;
+    private ExprOrCallNode left;
+    private ExprOrCallNode right;
+    private Binop binop;
+    private String value;
     private String tree;
 
-
-    public ExprNode(Node left, Node right, Binop binop) {
+    public ExprNode(ExprOrCallNode left, ExprOrCallNode right, Binop binop) {
         this.value = null;
         Expr left_type;
         if (left instanceof ExprNode) {
             left_type = ((ExprNode)left).type;
-        } else if (left instanceof FunNode && ((FunNode)left).func.output_type != FunctionReturnType.VOID) {
-            left_type = Constants.get_expr_from_function_return_type(((FunNode)left).func.output_type);
+        } else if (left instanceof FunNode && ((FunNode)left).getFunc().output_type != FunctionReturnType.VOID) {
+            left_type = Constants.get_expr_from_function_return_type(((FunNode)left).getFunc().output_type);
         } else {
             type = Expr.ErrorExpr;
-            value = "Cannot apply binop not to non-void functions or other expressions";
+            value = "Cannot apply binop to void functions results";
             return;
         }
 
         Expr right_type;
         if (right instanceof ExprNode) {
             right_type = ((ExprNode)right).type;
-        } else if (right instanceof FunNode && ((FunNode)right).func.output_type != FunctionReturnType.VOID) {
-            right_type = Constants.get_expr_from_function_return_type(((FunNode)right).func.output_type);
+        } else if (right instanceof FunNode && ((FunNode)right).getFunc().output_type != FunctionReturnType.VOID) {
+            right_type = Constants.get_expr_from_function_return_type(((FunNode)right).getFunc().output_type);
         } else {
             type = Expr.ErrorExpr;
-            value = "Cannot apply binop not to non-void functions or other expressions";
+            value = "Cannot apply binop to void functions results";
             return;
         }
-
 
         this.left = left;
         this.right = right;
@@ -76,6 +74,26 @@ public class ExprNode implements Node {
         this.right = null;
         this.binop = null;
         this.tree = null;
+    }
+
+    public Binop getBinop() {
+        return this.binop;
+    }
+
+    public String getValue() {
+        return this.value;
+    }
+
+    public Expr getType() {
+        return this.type;
+    }
+
+    public ExprOrCallNode getLeft() {
+        return this.left;
+    }
+
+    public ExprOrCallNode getRight() {
+        return this.right;
     }
 
     private String getStr() { // 8-char string representation of Node (GET_STR_LENGTH = 8)

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import src.Parser;
 import src.consts.Expr;
 import src.consts.Type;
+import src.nodes.ExprNode;
 import src.nodes.InstrNode;
 
 
@@ -27,7 +28,7 @@ public class InstructionParsingTest {
     })
     void testErrors(String expr) {
         Parser p = new Parser();
-        assertEquals(p.parseInstr(expr).type, Expr.ErrorExpr);
+        assertEquals(p.parseInstr(expr).getType(), Expr.ErrorExpr);
     }
 
     @Test
@@ -35,15 +36,15 @@ public class InstructionParsingTest {
         Parser p = new Parser();
         assertEquals(p.Variables.get("x"), null);
         InstrNode n1 = p.parseInstr("int x:=30;");
-        assertEquals(n1.type, Expr.IntExpr);
-        assertEquals(n1.var_name, "x");
-        assertEquals(n1.expression.type, Expr.IntExpr);
+        assertEquals(n1.getType(), Expr.IntExpr);
+        assertEquals(n1.getVarname(), "x");
+        assertEquals(((ExprNode)n1.getExpression()).getType(), Expr.IntExpr);
 
-        assertEquals(p.parseInstr("int x := 23;").type, Expr.ErrorExpr); // dont have to declare the type
-        assertEquals(p.parseInstr("str x := 23;").type, Expr.ErrorExpr); // dont have to declare the type
-        assertEquals(p.parseInstr("x := \"23\";").type, Expr.ErrorExpr); // type must be int
-        assertEquals(p.parseInstr("x := x * \"abacaba\";").type, Expr.ErrorExpr); // type must be int
-        assertEquals(p.parseInstr("x := x + x * x;").type, Expr.IntExpr); // OK
+        assertEquals(p.parseInstr("int x := 23;").getType(), Expr.ErrorExpr); // dont have to declare the type
+        assertEquals(p.parseInstr("str x := 23;").getType(), Expr.ErrorExpr); // dont have to declare the type
+        assertEquals(p.parseInstr("x := \"23\";").getType(), Expr.ErrorExpr); // type must be int
+        assertEquals(p.parseInstr("x := x * \"abacaba\";").getType(), Expr.ErrorExpr); // type must be int
+        assertEquals(p.parseInstr("x := x + x * x;").getType(), Expr.IntExpr); // OK
         assertEquals(p.Variables.get("x"), Type.INTEGER);
     }
 }

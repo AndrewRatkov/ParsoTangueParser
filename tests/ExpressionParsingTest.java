@@ -20,6 +20,7 @@ import src.consts.Expr;
 import src.consts.ExprReaderResponses;
 import src.consts.Type;
 import src.nodes.ExprNode;
+import src.nodes.ExprOrCallNode;
 
 
 
@@ -53,7 +54,7 @@ public class ExpressionParsingTest {
         assertTrue(p.read("2 + a2hgf == 4".toCharArray(), 4).isSame(ExprReaderResponses.READ_VARIABLE, 9));
         assertTrue(p.read("(bhdeb - abcdef12345ghi)".toCharArray(), 9).isSame(ExprReaderResponses.READ_VARIABLE,23));
 
-        assertTrue(p.read("2 + ab3def(3+3)".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_AFTER_VARIABLE, 10));
+        assertTrue(p.read("2 + ab3def(3+3)".toCharArray(), 4).isSame(ExprReaderResponses.READ_FUN_CALL, 15));
         assertTrue(p.read("2 + ab3def~3 + 3".toCharArray(), 4).isSame(ExprReaderResponses.ERROR_AFTER_VARIABLE, 10));
 
         assertTrue(p.read("9 * \"cucu\"".toCharArray(), 4).isSame(ExprReaderResponses.READ_STRING, 10));
@@ -80,16 +81,16 @@ public class ExpressionParsingTest {
         ExprNode cur_node = node;
         for (char c : path.toCharArray()) {
             if (c == 'L') {
-                if (cur_node.left == null) return false;
-                cur_node = (ExprNode)cur_node.left;
+                if (cur_node.getLeft() == null) return false;
+                cur_node = (ExprNode)cur_node.getLeft();
             } else if (c == 'R') {
-                if (cur_node.right == null) return false;
-                cur_node = (ExprNode)cur_node.right;
+                if (cur_node.getRight() == null) return false;
+                cur_node = (ExprNode)cur_node.getRight();
             } else {
                 return false;
             }
         }
-        return cur_node.value.equals(expected_val);
+        return cur_node.getValue().equals(expected_val);
     }
 
     private boolean checkBinop(ExprNode node, String path, Binop expected_binop) {
@@ -98,17 +99,17 @@ public class ExpressionParsingTest {
         ExprNode cur_node = node;
         for (char c : path.toCharArray()) {
             if (c == 'L') {
-                if (cur_node.left == null) return false;
-                cur_node = (ExprNode)cur_node.left;
+                if (cur_node.getLeft() == null) return false;
+                cur_node = (ExprNode)cur_node.getLeft();
             } else if (c == 'R') {
-                if (cur_node.right == null) return false;
-                cur_node = (ExprNode)cur_node.right;
+                if (cur_node.getRight() == null) return false;
+                cur_node = (ExprNode)cur_node.getRight();
             } else {
                 return false;
             }
         }
 
-        return cur_node.binop == expected_binop;
+        return cur_node.getBinop() == expected_binop;
     }
 
     private boolean checkStructure(ExprNode node, Map<String, String> expected_vals, Map<String, Binop>expected_binops) {
@@ -123,7 +124,7 @@ public class ExpressionParsingTest {
 
     @Test
     void testParsePrimaryExpr1() {
-        Stack<ExprNode> st_nodes = new Stack<>();
+        Stack<ExprOrCallNode> st_nodes = new Stack<>();
         st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
         st_nodes.push(new ExprNode(Expr.IntExpr, "3"));
         st_nodes.push(new ExprNode(Expr.IntExpr, "5"));
@@ -162,7 +163,7 @@ public class ExpressionParsingTest {
 
     @Test
     void testParsePrimaryExpr2() {
-        Stack<ExprNode> st_nodes = new Stack<>();
+        Stack<ExprOrCallNode> st_nodes = new Stack<>();
         st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
         st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
         st_nodes.push(new ExprNode(Expr.IntExpr, "2"));
@@ -201,7 +202,7 @@ public class ExpressionParsingTest {
 
     @Test
     void testParseLongPrimaryExpr() {
-        Stack<ExprNode> st_nodes = new Stack<>();
+        Stack<ExprOrCallNode> st_nodes = new Stack<>();
         int LEN = 10000;
         for (int i = 0; i < LEN; ++i) {
             st_nodes.push(new ExprNode(Expr.IntExpr, String.valueOf(i)));
@@ -250,12 +251,12 @@ public class ExpressionParsingTest {
     void testParseExpr2(String expr) {
         Parser p = new Parser();
         ExprNode root = p.parseExpr(expr);
-        assertTrue(root.type == Expr.ErrorExpr);
+        assertTrue(root.getType() == Expr.ErrorExpr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
-        assertTrue(((ExprNode)root.right).type == Expr.StringExpr);
+        assertTrue(((ExprNode)root.getRight()).getType() == Expr.StringExpr);
         assertTrue(goToChild(root, "R", "\"3\""));
-        assertTrue(((ExprNode)root.left).type == Expr.IntExpr);
+        assertTrue(((ExprNode)root.getLeft()).getType() == Expr.IntExpr);
         assertTrue(goToChild(root, "LR", "2"));
         assertTrue(goToChild(root, "LL", "1"));
     }
@@ -271,16 +272,16 @@ public class ExpressionParsingTest {
         }};
         Parser p = new Parser(vars_before);
 
-        assertTrue(p.parseExpr("(x+y)>=(z==t)").type == Expr.IntExpr);
-        assertTrue(p.parseExpr("x*z+30*t==z*(t==t)").type == Expr.IntExpr);
-        assertTrue(p.parseExpr("60*t+(3>2)*z").type == Expr.StringExpr);
-        assertTrue(p.parseExpr("60*t==(3>2)*(z!=z)").type == Expr.ErrorExpr);
+        assertTrue(p.parseExpr("(x+y)>=(z==t)").getType() == Expr.IntExpr);
+        assertTrue(p.parseExpr("x*z+30*t==z*(t==t)").getType() == Expr.IntExpr);
+        assertTrue(p.parseExpr("60*t+(3>2)*z").getType() == Expr.StringExpr);
+        assertTrue(p.parseExpr("60*t==(3>2)*(z!=z)").getType() == Expr.ErrorExpr);
     }
 
     @Test
     void testParseEmptyString() {
         Parser p = new Parser();
         ExprNode n = p.parseExpr("");
-        assertEquals(n.type, Expr.ErrorExpr);
+        assertEquals(n.getType(), Expr.ErrorExpr);
     }
 }

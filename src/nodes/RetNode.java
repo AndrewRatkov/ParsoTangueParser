@@ -1,10 +1,10 @@
 package src.nodes;
 
 public class RetNode implements Node {
-    public ExprNode expression;
+    private ExprOrCallNode expression;
     private String tree;
 
-    public RetNode(ExprNode _expression) {
+    public RetNode(ExprOrCallNode _expression) {
         this.expression = _expression;
     }
     

@@ -7,15 +7,23 @@ import src.consts.Expr;
 import src.consts.FunctionInfo;
 import src.consts.FunctionReturnType;
 
-public class FunNode implements Node {
-    public FunctionInfo func;
-    public List<Node> params;
+public class FunNode implements ExprOrCallNode {
+    private FunctionInfo func;
+    private List<ExprOrCallNode> params;
     private String tree;
     private boolean valid;
     private String message;
 
+    public FunctionInfo getFunc() {
+        return this.func;
+    }
 
-    public FunNode(FunctionInfo _func, List<Node> _params) {
+    public FunNode(String error) {
+        valid = false;
+        message = error;
+    }
+
+    public FunNode(FunctionInfo _func, List<ExprOrCallNode> _params) {
         func = _func;
         params = _params;
         valid = true;
@@ -28,7 +36,7 @@ public class FunNode implements Node {
             Expr expected = Constants.get_expr_from_type(func.input_types.get(i));
             Node got = params.get(i);
             if (got instanceof ExprNode) {
-                Expr expr_got = ((ExprNode)got).type;
+                Expr expr_got = ((ExprNode)got).getType();
                 if (expr_got != expected) {
                     valid = false;
                     message = "incorrect argument " + i + ": expected " + expected + ", got " + expr_got;
@@ -50,7 +58,8 @@ public class FunNode implements Node {
     }
 
     public void buildTree() {
-        tree = "[" + func.output_type + ' ' + func.name + "]";
+        if (func != null) tree = "[" + func.output_type + ' ' + func.name + "]";
+        else tree = "[ERR]";
         String GO_LEFT = "------->";
         if (!valid) {
             tree += GO_LEFT + "{" + message + "}\n";

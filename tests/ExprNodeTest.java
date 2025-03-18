@@ -15,11 +15,11 @@ public class ExprNodeTest {
     @Test
     void defaultConstructorTest() {
         ExprNode n = new ExprNode(Expr.StringExpr, "hrundelair");
-        assertEquals(n.type, Expr.StringExpr);
-        assertEquals(n.value, "hrundelair");
-        assertEquals(n.left, null);
-        assertEquals(n.right, null);
-        assertEquals(n.binop, null);
+        assertEquals(n.getType(), Expr.StringExpr);
+        assertEquals(n.getValue(), "hrundelair");
+        assertEquals(n.getLeft(), null);
+        assertEquals(n.getRight(), null);
+        assertEquals(n.getBinop(), null);
     }
 
     @Test
@@ -28,12 +28,12 @@ public class ExprNodeTest {
         ExprNode b = new ExprNode(Expr.IntExpr, "12345");
         ExprNode parent = new ExprNode(a, b, BinopConstants.ADD);
 
-        assertEquals(parent.type, Expr.IntExpr);
-        assertEquals(parent.left, a);
-        assertEquals(parent.right, b);
-        assertEquals(parent.binop, BinopConstants.ADD);
-        assertEquals(parent.value, null);
-        assertEquals(((ExprNode)parent.left).value, "30");
+        assertEquals(parent.getType(), Expr.IntExpr);
+        assertEquals(parent.getLeft(), a);
+        assertEquals(parent.getRight(), b);
+        assertEquals(parent.getBinop(), BinopConstants.ADD);
+        assertEquals(parent.getValue(), null);
+        assertEquals(((ExprNode)parent.getLeft()).getValue(), "30");
     }
 
     @ParameterizedTest
@@ -69,9 +69,9 @@ public class ExprNodeTest {
         ExprNode b = new ExprNode(b_expr, "");
         ExprNode c = new ExprNode(a, b, binop);
 
-        assertEquals(c.type, expected_expr);
-        assertEquals(c.left, a);
-        assertEquals(c.right, b);
-        assertEquals(c.binop, binop);
+        assertEquals(c.getType(), expected_expr);
+        assertEquals(c.getLeft(), a);
+        assertEquals(c.getRight(), b);
+        assertEquals(c.getBinop(), binop);
     }
 }

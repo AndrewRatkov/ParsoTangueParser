@@ -9,10 +9,13 @@ import src.consts.BinopConstants;
 import src.consts.Constants;
 import src.consts.Expr;
 import src.consts.ExprReaderResponses;
+import src.consts.FunctionInfo;
 import src.consts.TextReaderResponses;
 import src.consts.Type;
 import src.nodes.CondNode;
 import src.nodes.ExprNode;
+import src.nodes.ExprOrCallNode;
+import src.nodes.FunNode;
 import src.nodes.InstrNode;
 import src.nodes.Node;
 import src.structs.Pair;
@@ -26,6 +29,7 @@ public class Parser implements Cloneable {
     // todo private boolean return_instructions_allowed; // если парсим внутренность функций -- добавляется возможность парсить инструкции вида: return Expr;
 
     public HashMap<String, Type> Variables;
+    public HashMap<String, FunctionInfo> Functions;
 
     public Parser() {
         this.Variables = new HashMap<>();
@@ -35,11 +39,17 @@ public class Parser implements Cloneable {
         this.Variables = _Variables;
     }
 
+    public Parser(HashMap<String, Type> _Variables, HashMap<String, FunctionInfo> _Functions) {
+        this.Variables = _Variables;
+        this.Functions = _Functions;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Parser clone() {
         Parser new_parser = new Parser();
         if (Variables != null) new_parser.Variables = (HashMap<String, Type>)Variables.clone();
+        if (Functions != null) new_parser.Functions = (HashMap<String, FunctionInfo>)Functions.clone();
         return new_parser; 
     } 
 
@@ -80,10 +90,22 @@ public class Parser implements Cloneable {
             while (idx < str.length && str[idx] != '\"') ++idx;
             if (idx == str.length) return new Pair<>(ExprReaderResponses.ERROR_STRING_DOESNT_END, idx);
             return new Pair<>(ExprReaderResponses.READ_STRING, idx + 1);
-        } else if (Character.isLetter(str[idx])){ // reading a variable
+        } else if (Character.isLetter(str[idx])){ // reading a variable or a function call
             while (idx < str.length && Character.isLetterOrDigit(str[idx])) ++idx;
             if (idx == str.length || Character.isWhitespace(str[idx]) || BinopConstants.BINOP_FIRST_CHARS.indexOf(str[idx]) != -1 || str[idx] == ')') {
                 return new Pair<>(ExprReaderResponses.READ_VARIABLE, idx);
+            } else if (str[idx] == '(') {
+                int opened_brackets = 1, used_quotes = 0;
+                ++idx;
+                while (opened_brackets > 0) {
+                    if (str[idx] == '\"') ++used_quotes;
+                    if (used_quotes % 2 == 0) {
+                        if (str[idx] == '(') ++opened_brackets;
+                        else if (str[idx] == ')') --opened_brackets;
+                    }
+                    ++idx;
+                }
+                return new Pair<>(ExprReaderResponses.READ_FUN_CALL, idx);
             } else {
                 return new Pair<>(ExprReaderResponses.ERROR_AFTER_VARIABLE, idx);
             }
@@ -92,14 +114,14 @@ public class Parser implements Cloneable {
         }
     }
 
-    public ExprNode parsePrimaryExpr(Stack<ExprNode> nodes, Stack<Binop> binops, int last_nodes) {
+    public ExprNode parsePrimaryExpr(Stack<ExprOrCallNode> nodes, Stack<Binop> binops, int last_nodes) {
         // pop last (last_nodes) elements from nodes and apply their binops to them
         assert last_nodes > 0;
-        ExprNode t = nodes.pop();
-        if (last_nodes == 1) return t;
+        ExprOrCallNode t = nodes.pop();
+        if (last_nodes == 1) return (ExprNode)t;
 
         // repack last (last_nodes) nodes and last (last_nodes - 1) binops into new arraylists
-        Stack<ExprNode> temp_stack_nodes = new Stack<>();
+        Stack<ExprOrCallNode> temp_stack_nodes = new Stack<>();
         temp_stack_nodes.push(t);
         Stack<Binop> temp_stack_binops = new Stack<>();
         for (int k = 0; k < last_nodes - 1; ++k) {
@@ -107,7 +129,7 @@ public class Parser implements Cloneable {
             temp_stack_binops.push(binops.pop());
         }
         
-        List<ExprNode> expr_nodes = new ArrayList<>();
+        List<ExprOrCallNode> expr_nodes = new ArrayList<>();
         while (!temp_stack_nodes.isEmpty()) expr_nodes.add(temp_stack_nodes.pop());
 
         List<Binop> expr_binops = new ArrayList<>();
@@ -117,7 +139,7 @@ public class Parser implements Cloneable {
         for (int pr = BinopConstants.MAX_PROPRITY; pr >= BinopConstants.MIN_PROPRITY; --pr) {
             assert expr_binops.size() + 1 == expr_nodes.size();
 
-            List<ExprNode> new_nodes = new ArrayList<>();
+            List<ExprOrCallNode> new_nodes = new ArrayList<>();
             new_nodes.add(expr_nodes.get(0));
             List<Binop> new_binops = new ArrayList<>();
 
@@ -126,7 +148,7 @@ public class Parser implements Cloneable {
                     new_nodes.add(expr_nodes.get(k + 1));
                     new_binops.add(expr_binops.get(k));
                 } else {
-                    ExprNode lst = new_nodes.removeLast();
+                    ExprOrCallNode lst = new_nodes.removeLast();
                     new_nodes.add(new ExprNode(lst, expr_nodes.get(k + 1), expr_binops.get(k)));
                 }
             }
@@ -136,7 +158,8 @@ public class Parser implements Cloneable {
         }
 
         assert expr_nodes.size() == 1;
-        return expr_nodes.get(0);
+        assert expr_nodes.get(0) instanceof ExprNode;
+        return (ExprNode)expr_nodes.get(0);
     }
 
     /*
@@ -170,7 +193,7 @@ public class Parser implements Cloneable {
         int idx = 0;
         boolean expected_a_value = true;
         Stack<Integer> openning_brackets = new Stack<>();
-        Stack<ExprNode> nodes = new Stack<>();
+        Stack<ExprOrCallNode> nodes = new Stack<>();
         Stack<Binop> binops = new Stack<>();
 
         Pair<ExprReaderResponses, Integer> p = read(char_array, idx);
@@ -231,6 +254,15 @@ public class Parser implements Cloneable {
                         expected_a_value = false;
                         break;
                     }
+                case ExprReaderResponses.READ_FUN_CALL:
+                    if (!expected_a_value) {
+                        return new ExprNode(Expr.ErrorExpr, "Expected binop, got value");
+                    } else {
+                        FunNode new_node = parseFunCall(String.copyValueOf(char_array, idx, p.second() - idx));
+                        nodes.push(new_node);
+                        expected_a_value = false;
+                        break;
+                    }
                 case ExprReaderResponses.CLOSING_BRACKET:
                     if (expected_a_value) {
                         return new ExprNode(Expr.ErrorExpr, "Got ')' after a binary operator, expected a value");
@@ -254,6 +286,74 @@ public class Parser implements Cloneable {
             return new ExprNode(Expr.ErrorExpr, "Empty expression");
         }
         return parsePrimaryExpr(nodes, binops, nodes.size());
+    }
+
+    // если строка имеет вид funName(...), то выводит длину fun_name, иначе -1
+    private int funcPrefSkip(char[] char_array) {
+        int len = char_array.length;
+        if (len == 0 || char_array[len - 1] != ')') return -1;
+        int idx = 0;
+        if (!Character.isLetter(char_array[0])) return -1;
+        while (Character.isLetterOrDigit(char_array[idx])) ++idx;
+        if (char_array[idx] != '(') return -1;
+        int res = idx;
+
+        // еще надо проверить "правильность" правильной скобочной последовательности, то есть что у нас последняя скобка действительно соответствует именно первой, а не какой-то ещё"
+        ++idx;
+        int used_quotes = 0;
+        int opened = 1;
+        while (idx < len) {
+            if (char_array[idx] == '\"') ++used_quotes; // внутри строк может происходить что угодно
+            else if (used_quotes % 2 == 0 && char_array[idx] == '(') ++opened;
+            else if (used_quotes % 2 == 0 && char_array[idx] == ')') --opened;
+            ++idx;
+            if (idx < len && opened == 0) return -1;
+        }
+        if (opened != 0) return -1;
+        return res;
+    }
+
+    public FunNode parseFunCall(String str) { // smth like: funName(...);
+        char[] char_array = str.trim().toCharArray();
+        int res = funcPrefSkip(char_array);
+        if (res == -1) return new FunNode("incorrect function call");
+
+        String fun_name = String.valueOf(char_array, 0, res);
+        if (Functions == null || Functions.get(fun_name) == null) return new FunNode("function not found");
+        
+        FunctionInfo f_info = Functions.get(fun_name);
+
+
+        int idx = res + 1;
+        int cur = idx;
+        int opened_quotes = 0, opened_brackets = 0; // dont count the outer brackets now
+        List<ExprOrCallNode> params = new ArrayList<>();
+        while (idx < char_array.length) {
+            char c  = char_array[idx];
+            if (c == '\"') ++opened_quotes;
+            else if (opened_quotes % 2 == 0) {
+                if (c == '(') ++opened_brackets;
+                else if (c == ')' && opened_brackets > 0) --opened_brackets;
+                else if ((c == ',' || c == ')') && opened_brackets == 0) {
+                    if (idx == cur) {
+                        if (cur == res + 1) return new FunNode(f_info, params); // no params
+                        else return new FunNode("incorrect function call"); // ",)" construction
+                    } 
+                    String between = String.valueOf(char_array, cur, idx - cur);
+                    if (funcPrefSkip(between.trim().toCharArray()) != -1) {
+                        FunNode fn = parseFunCall(between);
+                        params.add(fn);
+                    } else {
+                        ExprNode en = parseExpr(between);
+                        params.add(en);
+                    }
+                    cur = idx + 1;
+                } 
+            }
+            ++idx;
+        } 
+        
+        return new FunNode(f_info, params);
     } 
 
     /*
@@ -326,11 +426,15 @@ public class Parser implements Cloneable {
         if (type_declared) type_of_expr_expected = Constants.get_expr(first_word);
         else type_of_expr_expected = (Variables.get(var_name) == Type.INTEGER ? Expr.IntExpr : Expr.StringExpr);
 
-        if (expr.type != type_of_expr_expected) {
-            return new InstrNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.type, null);
+        if (expr.getType() != type_of_expr_expected) {
+            return new InstrNode(Expr.ErrorExpr, "Expression expected to be " + type_of_expr_expected + " but was " + expr.getType(), null);
         }
 
         if (type_declared) {
+            if (Functions != null && Functions.get(var_name) != null) {
+                return new InstrNode(Expr.ErrorExpr, var_name + " is a function", null);
+            }
+            if (Variables == null) Variables = new HashMap<>();
             if (type_of_expr_expected == Expr.IntExpr) Variables.put(var_name, Type.INTEGER);
             else Variables.put(var_name, Type.STRING);
         }
