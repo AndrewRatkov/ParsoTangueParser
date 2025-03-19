@@ -5,11 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-
-import src.consts.TextReaderResponses;
-import src.nodes.Node;
-import src.structs.Pair;
+import src.nodes.ProgramNode;
 
 public class Main {
 
@@ -50,17 +46,11 @@ public class Main {
         String input = args[0], output = args[1];
         Parser parser = new Parser();
 
-        String cmds = get_str_from_file(input);
-        Pair<TextReaderResponses, List<Node>> nodes_info = parser.parseCommands(cmds);
-        
-        //System.out.println(nodes_info.first());
-        String answer = "";
-        for (Node n : nodes_info.second()) {
-            answer += n.getTree();
-        }
+        String text = get_str_from_file(input);
+        ProgramNode program = parser.parseProgram(text);
         
         try {
-            Main.writeFile(output, answer);
+            Main.writeFile(output, program.getTree());
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
             System.exit(1);

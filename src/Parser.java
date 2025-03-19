@@ -22,6 +22,7 @@ import src.nodes.InstrFunCallNode;
 import src.nodes.InstrNode;
 import src.nodes.AssnNode;
 import src.nodes.Node;
+import src.nodes.ProgramNode;
 import src.nodes.RetNode;
 import src.structs.Pair;
 
@@ -691,5 +692,42 @@ public class Parser implements Cloneable {
         this.Functions.put(fun_name, f_info);
         
         return new FunctionDeclareNode(f_info, inner_parse_res.second(), varnames);
+    }
+
+    public ProgramNode parseProgram(String text) {
+        int idx = 0;
+        final int len = text.length();
+        while (idx < len && Character.isWhitespace(text.charAt(idx))) ++idx;
+        if (idx == len) return new ProgramNode(new ArrayList<>()); // empty program
+
+        List<Node> nodes = new ArrayList<>();
+
+        int used_quotes = 0;
+        boolean in_function = false;
+        int last_fun_start_idx = -1;
+        int last_fun_end_idx = 0;
+        for ( ; idx < len; ++idx) {
+            if (text.charAt(idx) == '\"') ++used_quotes;
+            if (used_quotes % 2 == 1) continue;
+            if (!in_function && idx + 4 < len && text.substring(idx, idx + 3).equals("def")
+                && Character.isWhitespace(text.charAt(idx + 3)) // space after
+                && (idx == 0 || Character.isWhitespace(text.charAt(idx - 1)))) { // space before
+                    List<Node> new_nodes = parseCommands(text.substring(last_fun_end_idx, idx)).second();
+                    if (new_nodes != null) nodes.addAll(new_nodes); 
+                    in_function = true;
+                    last_fun_start_idx = idx;
+            } else if (in_function && idx + 6 <= len
+            && text.substring(idx, idx + 6).equals("enddef")
+            && (len == idx + 6 || Character.isWhitespace(text.charAt(idx + 6)))
+            ) {
+                in_function = false;
+                idx += 6;
+                if (last_fun_start_idx >= 0) nodes.add(parseFunDefinition(text.substring(last_fun_start_idx, idx)));
+                last_fun_end_idx = idx;
+            }
+        }
+        List<Node> new_nodes = parseCommands(text.substring(last_fun_end_idx, len)).second();
+        if (new_nodes != null) nodes.addAll(new_nodes); 
+        return new ProgramNode(nodes);
     }
 }

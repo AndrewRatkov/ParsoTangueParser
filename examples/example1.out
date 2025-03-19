@@ -1,0 +1,37 @@
+[PROGRAM]
+  |
+  +---->IF
+  |     |
+  |     +--->[INT,==]------->[INT,1]
+  |     |        |
+  |     |        +---------->[INT,0]
+  |     |
+  |     THEN
+  |     |
+  |     +--->[DEF int x]--->[INT,1]
+  |     |
+  |     ELSE
+  |     |
+  |     +--->[DEF int h]--->[INT,0]
+  |     |
+  |     FI
+  |
+  +---->[DEF FUN f(INTEGER u)=>INT]
+  |     |   
+  |     +-->IF
+  |         |
+  |         +--->[INT,==]------->[INT,u]
+  |         |        |
+  |         |        +---------->[INT,0]
+  |         |
+  |         THEN
+  |         |
+  |         +--->[RETURN]--->[INT,0]
+  |         |
+  |         ELSE
+  |         |
+  |         +--->[RETURN]--->[INT,1]
+  |         |
+  |         FI
+  |
+  +---->[ERR f is a function]

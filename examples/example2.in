@@ -1,0 +1,15 @@
+int x := 2;
+
+def int mod()
+if x >= 0
+then return x;
+else return 0 - x;
+fi
+enddef
+
+def str h(str s)
+return s * mod();
+enddef
+
+str s := h("abacaba");
+s := s * (7 + 7 % 4);

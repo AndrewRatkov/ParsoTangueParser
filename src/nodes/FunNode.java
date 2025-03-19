@@ -24,6 +24,7 @@ public class FunNode implements ExprOrCallNode {
     }
 
     public Expr getType() {
+        if (func.output_type == null) return Expr.ErrorExpr;
         switch (func.output_type) {
             case FunctionReturnType.INT:
                 return Expr.IntExpr;

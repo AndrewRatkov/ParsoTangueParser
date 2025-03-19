@@ -1,0 +1,19 @@
+if
+    1 == 0
+then
+    int x := 1;
+else
+    int h := 0;
+fi
+
+def int f(int u)
+    if
+        u == 0
+    then
+        return 0;
+    else
+        return 1;
+    fi
+enddef
+
+int f := 4;
