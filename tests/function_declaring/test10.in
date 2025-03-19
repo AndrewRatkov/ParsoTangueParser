@@ -1,0 +1,8 @@
+def str abacaba(int x)
+if abacaba(0) == "hrundelair"
+then return "OK";
+else
+x := x + 1;
+return "NOT OK"*x;
+fi
+enddef

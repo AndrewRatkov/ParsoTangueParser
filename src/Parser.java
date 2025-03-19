@@ -17,6 +17,7 @@ import src.nodes.CondNode;
 import src.nodes.ExprNode;
 import src.nodes.ExprOrCallNode;
 import src.nodes.FunNode;
+import src.nodes.FunctionDeclareNode;
 import src.nodes.InstrFunCallNode;
 import src.nodes.InstrNode;
 import src.nodes.AssnNode;
@@ -61,6 +62,8 @@ public class Parser implements Cloneable {
         Parser new_parser = new Parser();
         if (Variables != null) new_parser.Variables = (HashMap<String, Type>)Variables.clone();
         if (Functions != null) new_parser.Functions = (HashMap<String, FunctionInfo>)Functions.clone();
+        new_parser.accepts_return_instructions = this.accepts_return_instructions;
+        new_parser.ret_type = this.ret_type;
         return new_parser; 
     } 
 
@@ -125,11 +128,11 @@ public class Parser implements Cloneable {
         }
     }
 
-    public ExprNode parsePrimaryExpr(Stack<ExprOrCallNode> nodes, Stack<Binop> binops, int last_nodes) {
+    public ExprOrCallNode parsePrimaryExpr(Stack<ExprOrCallNode> nodes, Stack<Binop> binops, int last_nodes) {
         // pop last (last_nodes) elements from nodes and apply their binops to them
         assert last_nodes > 0;
         ExprOrCallNode t = nodes.pop();
-        if (last_nodes == 1) return (ExprNode)t;
+        if (last_nodes == 1) return t;
 
         // repack last (last_nodes) nodes and last (last_nodes - 1) binops into new arraylists
         Stack<ExprOrCallNode> temp_stack_nodes = new Stack<>();
@@ -170,13 +173,13 @@ public class Parser implements Cloneable {
 
         assert expr_nodes.size() == 1;
         assert expr_nodes.get(0) instanceof ExprNode;
-        return (ExprNode)expr_nodes.get(0);
+        return expr_nodes.get(0);
     }
 
     /*
      * Строит синтаксический разбор арифметического выражения
      */
-    public ExprNode parseExpr(String str) {
+    public ExprOrCallNode parseExpr(String str) {
         int opened_brackets = 0;
         int used_quotes = 0;
         boolean in_string = false;
@@ -200,7 +203,7 @@ public class Parser implements Cloneable {
         if (opened_brackets > 0) return new ExprNode(Expr.ErrorExpr, "Too many opened brackets");
         else if (used_quotes % 2 == 1) return new ExprNode(Expr.ErrorExpr, "Not finished string");
         else if (!correct_brackets_sequence) return new ExprNode(Expr.ErrorExpr, "Incorrect brackets sequence");
-
+        
         int idx = 0;
         boolean expected_a_value = true;
         Stack<Integer> openning_brackets = new Stack<>();
@@ -279,7 +282,7 @@ public class Parser implements Cloneable {
                         return new ExprNode(Expr.ErrorExpr, "Got ')' after a binary operator, expected a value");
                     } 
                     Integer last_openning_bracket = openning_brackets.pop();
-                    ExprNode new_node = parsePrimaryExpr(nodes, binops, nodes.size() - last_openning_bracket);
+                    ExprOrCallNode new_node = parsePrimaryExpr(nodes, binops, nodes.size() - last_openning_bracket);
                     nodes.push(new_node);
                     break;
                 case ExprReaderResponses.FINISHED_READING:
@@ -355,7 +358,7 @@ public class Parser implements Cloneable {
                         FunNode fn = parseFunCall(between);
                         params.add(fn);
                     } else {
-                        ExprNode en = parseExpr(between);
+                        ExprOrCallNode en = parseExpr(between);
                         params.add(en);
                     }
                     cur = idx + 1;
@@ -386,20 +389,23 @@ public class Parser implements Cloneable {
         }
 
         String ret = "return";
+        if (ret_type == FunctionReturnType.VOID) {
+            boolean only_spaces = true;
+            for (int idx = ret.length(); idx < str.length() - 1; ++idx) {
+                if (!Character.isWhitespace(str.charAt(idx))) { only_spaces = false; break; }
+            }
+            if (only_spaces) return new RetNode(null);
+        }
+
         if (str.startsWith(ret) && Character.isWhitespace(str.charAt(ret.length()))) {
             if (!accepts_return_instructions) {
                 return new RetNode(new ExprNode(Expr.ErrorExpr, "cannot return"));
-            }
-            if (ret_type == FunctionReturnType.VOID) {
-                for (char c : str.substring(ret.length() + 1, str.length() - 1).toCharArray()) {
-                    if (!Character.isWhitespace(c)) return new RetNode(new ExprNode(Expr.ErrorExpr, "cannot return anything when void"));
-                }
-                return new RetNode(null);
-            }
+            }   
+
             ExprOrCallNode inner_node = parseExpr(str.substring(ret.length() + 1, str.length() - 1));
             RetNode ret_node = new RetNode(inner_node);
-            if (ret_node.getExpression() instanceof FunNode && ((FunNode)ret_node.getExpression()).getFunc().output_type == FunctionReturnType.VOID) {
-                return new RetNode(new ExprNode(Expr.ErrorExpr, "return type cannot be void"));
+            if (ret_node.getExpression() instanceof FunNode && ((FunNode)ret_node.getExpression()).getFunc() == null) {
+                return new RetNode(new ExprNode(Expr.ErrorExpr, "function not found"));
             }
             if (ret_node.returnType() != ret_type) {
                 return new RetNode(new ExprNode(Expr.ErrorExpr, "return type mismatch"));
@@ -499,7 +505,7 @@ public class Parser implements Cloneable {
         List<Node> result = new ArrayList<>();
         
         Stack<Parser> parsers = new Stack<>();
-        Stack<ExprNode> stmts = new Stack<>();
+        Stack<ExprOrCallNode> stmts = new Stack<>();
         Stack<List<Node> > then_node_lists = new Stack<>(), else_node_lists = new Stack<>();
         
         int idx = 0;
@@ -534,7 +540,7 @@ public class Parser implements Cloneable {
                                 if (parsers.empty()) expr_parser = this;
                                 else expr_parser = parsers.peek();
                                 
-                                ExprNode expr_node = expr_parser.parseExpr(String.copyValueOf(char_array, skip_if, idx - skip_if));
+                                ExprOrCallNode expr_node = expr_parser.parseExpr(String.copyValueOf(char_array, skip_if, idx - skip_if));
                                 stmts.push(expr_node);
                                 if (parsers.empty()) parsers.push(clone());
                                 else parsers.push(parsers.peek().clone());
@@ -611,4 +617,79 @@ public class Parser implements Cloneable {
         return new Pair<>(TextReaderResponses.OK, result);
     }
 
+    public FunctionDeclareNode parseFunDefinition(String str) {
+        assert str.startsWith("def");
+        assert Character.isWhitespace(str.charAt(3));
+        assert str.endsWith("enddef");
+        assert Character.isWhitespace(str.charAt(str.length() - 7));
+
+        int idx = 4;
+        while (Character.isWhitespace(str.charAt(idx))) ++idx;
+        
+        FunctionReturnType frt;
+        if (str.substring(idx, idx + 3).equals("int")) {frt = FunctionReturnType.INT;idx+=3;}
+        else if (str.substring(idx, idx + 3).equals("str")) {frt = FunctionReturnType.STR;idx+=3;}
+        else if (str.substring(idx, idx + 4).equals("void")) {frt = FunctionReturnType.VOID;idx+=4;}
+        else return new FunctionDeclareNode("unknown return type");
+        if (!Character.isWhitespace(str.charAt(idx))) return new FunctionDeclareNode("unknown return type"); // например intv funName(...), то есть после названия типа без побела дальше что-то
+        while (Character.isWhitespace(str.charAt(idx))) ++idx; 
+        
+        int start_name_idx = idx;
+        if (!Character.isLetter(str.charAt(start_name_idx))) return new FunctionDeclareNode("function name starts with not a letter");
+        
+        while (idx < str.length() && Character.isLetterOrDigit(str.charAt(idx))) ++idx;
+        if (idx == str.length() || str.charAt(idx) != '(') return new FunctionDeclareNode("'(' should be after function name");
+        
+        String fun_name = str.substring(start_name_idx, idx);
+        if (Constants.KEYWORDS.contains(fun_name)) return new FunctionDeclareNode("invalid function name");
+
+        ++idx;
+        while (Character.isWhitespace(str.charAt(idx))) ++idx;
+        int params_start_idx = idx;
+        while (idx < str.length() && str.charAt(idx) != ')') ++idx;
+        if (idx == str.length()) return new FunctionDeclareNode("')' not found");
+        List<Type> types = new ArrayList<>();
+        List<String> varnames = new ArrayList<>();
+        if (params_start_idx < idx) {
+            String[] declarations = str.substring(params_start_idx, idx).split(",");
+            for (int d = 0; d < declarations.length; ++d) {
+                String[] decl = declarations[d].trim().split(" ");
+                if (decl.length != 2) return new FunctionDeclareNode("incorrect declaration of varnames");
+                else if (!Constants.TYPE_NAMES.contains(decl[0])) return new FunctionDeclareNode("type " + decl[0] + "does not exist");
+                types.add(Constants.type_from_str(decl[0]));
+                if (Constants.KEYWORDS.contains(decl[1])) return new FunctionDeclareNode("varname cannot be a keyword");
+                else if (Variables != null && Variables.containsKey(decl[1])) return new FunctionDeclareNode("varname already used");
+                else if (Functions != null && Functions.containsKey(decl[1])) return new FunctionDeclareNode("varname already used as a function");
+                varnames.add(decl[1]);
+            }
+        }
+
+        FunctionInfo f_info = new FunctionInfo(fun_name, types, frt);
+
+        Parser in_function_parser = clone();
+        in_function_parser.enableReturnInstructions(frt);
+
+        if (in_function_parser.Functions == null) in_function_parser.Functions = new HashMap<>();
+        in_function_parser.Functions.put(fun_name, f_info);
+
+        if (in_function_parser.Variables == null) in_function_parser.Variables = new HashMap<>();
+        for (int i = 0; i < types.size(); ++i) {
+            if (in_function_parser.Variables.containsKey(varnames.get(i))) return new FunctionDeclareNode("repeating varnames");
+            in_function_parser.Variables.put(varnames.get(i), types.get(i));
+        }
+        
+
+        ++idx; // shift after ')'
+
+        Pair<TextReaderResponses, List<Node>> inner_parse_res = in_function_parser.parseCommands(str.substring(idx, str.length() - 7));
+        if (inner_parse_res.first() != TextReaderResponses.OK) {
+            return new FunctionDeclareNode("inner parsing ended with error " + inner_parse_res.first());
+        }
+
+        
+        if (this.Functions == null) this.Functions = new HashMap<>();
+        this.Functions.put(fun_name, f_info);
+        
+        return new FunctionDeclareNode(f_info, inner_parse_res.second(), varnames);
+    }
 }

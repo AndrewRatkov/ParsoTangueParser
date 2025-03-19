@@ -1,0 +1,21 @@
+[DEF FUN factorial(INTEGER n)=>INT]
+|   
++-->IF
+    |
+    +--->[INT,==]------->[INT,n]
+    |        |
+    |        +---------->[INT,1]
+    |
+    THEN
+    |
+    +--->[RETURN]--->[INT,1]
+    |
+    ELSE
+    |
+    +--->[RETURN]--->[INT,* ]------->[CALL INT factorial]------->[INT,- ]------->[INT,n]
+    |                    |                                           |
+    |                    |                                           +---------->[INT,1]
+    |                    |
+    |                    +---------->[INT,n]
+    |
+    FI

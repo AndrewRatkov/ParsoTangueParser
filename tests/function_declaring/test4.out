@@ -1,0 +1,23 @@
+[DEF FUN fib(INTEGER x)=>INT]
+|   
++-->IF
+    |
+    +--->[INT,< ]------->[INT,x]
+    |        |
+    |        +---------->[INT,2]
+    |
+    THEN
+    |
+    +--->[RETURN]--->[INT,x]
+    |
+    ELSE
+    |
+    +--->[RETURN]--->[INT,+ ]------->[CALL INT fib]------->[INT,- ]------->[INT,x]
+    |                    |                                     |
+    |                    |                                     +---------->[INT,1]
+    |                    |
+    |                    +---------->[CALL INT fib]------->[INT,- ]------->[INT,x]
+    |                                                          |
+    |                                                          +---------->[INT,2]
+    |
+    FI

@@ -12,7 +12,7 @@ import src.Main;
 import src.Parser;
 import src.consts.Type;
 import src.nodes.CondNode;
-import src.nodes.ExprNode;
+import src.nodes.ExprOrCallNode;
 import src.nodes.Node;
 
 
@@ -23,7 +23,7 @@ public class CondNodeTest {
     @Test
     void getTreeTest1() { // basic if-then-else-fi expression
         Parser p = new Parser();
-        ExprNode expr_node = p.parseExpr("1+2*(\"aba\"==\"a\"+\"ba\")");
+        ExprOrCallNode expr_node = p.parseExpr("1+2*(\"aba\"==\"a\"+\"ba\")");
         
         HashMap<String, Type> vars_before = new HashMap<>();
         vars_before.put("s", Type.STRING);
@@ -44,7 +44,7 @@ public class CondNodeTest {
     @Test
     void getTreeTest2() { // basic if-then-fi expression
         Parser p = new Parser();
-        ExprNode expr_node = p.parseExpr("2+2==4");
+        ExprOrCallNode expr_node = p.parseExpr("2+2==4");
 
         List<Node> then_nodes = new ArrayList<>();
         Parser ip = new Parser();
@@ -59,8 +59,8 @@ public class CondNodeTest {
     @Test
     void getTreeTest3() { // nested if expressions
         Parser p = new Parser();
-        ExprNode expr_node_out = p.parseExpr("1+(2>1)==5");
-        ExprNode expr_node_in = p.parseExpr("1==\"1\"");
+        ExprOrCallNode expr_node_out = p.parseExpr("1+(2>1)==5");
+        ExprOrCallNode expr_node_in = p.parseExpr("1==\"1\"");
 
         List<Node> then_in_nodes = new ArrayList<>(), else_in_nodes = new ArrayList<>();
         HashMap<String, Type> vars_before = new HashMap<>();

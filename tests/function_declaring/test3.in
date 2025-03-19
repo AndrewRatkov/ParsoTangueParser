@@ -1,0 +1,7 @@
+def int factorial(int n)
+if n == 1 then
+return 1;
+else
+return factorial(n - 1) * n;
+fi
+enddef

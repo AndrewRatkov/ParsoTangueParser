@@ -12,6 +12,7 @@ import src.consts.FunctionInfo;
 import src.consts.FunctionReturnType;
 import src.consts.Type;
 import src.nodes.ExprNode;
+import src.nodes.ExprOrCallNode;
 import src.nodes.FunNode;
 import src.nodes.RetNode;
 
@@ -23,7 +24,7 @@ public class TreeBuildTests {
     void retNodeTreeTest() {
         HashMap<String, Type> hm = new HashMap<>(){{put("x", Type.INTEGER);}};
         Parser p = new Parser(hm);
-        ExprNode expr_node = p.parseExpr("x+2-x");
+        ExprOrCallNode expr_node = p.parseExpr("x+2-x");
         RetNode n = new RetNode(expr_node);
         assertEquals(n.getTree(), Main.get_str_from_file(PATH + "ret_node_test.txt"));
     }
@@ -32,9 +33,9 @@ public class TreeBuildTests {
     void funNodeTest1() {
         HashMap<String, Type> hm = new HashMap<>(){{put("x", Type.INTEGER);}};
         Parser p = new Parser(hm);
-        ExprNode expr_node1 = p.parseExpr("x+2-x");
-        ExprNode expr_node2 = p.parseExpr("\"a\"*30");
-        ExprNode expr_node3 = p.parseExpr("1");
+        ExprOrCallNode expr_node1 = p.parseExpr("x+2-x");
+        ExprOrCallNode expr_node2 = p.parseExpr("\"a\"*30");
+        ExprOrCallNode expr_node3 = p.parseExpr("1");
         FunctionInfo function = new FunctionInfo("myFunction",
                                                  Arrays.asList(Type.INTEGER, Type.STRING, Type.INTEGER),
                                                  FunctionReturnType.VOID);
@@ -46,8 +47,8 @@ public class TreeBuildTests {
     void funNodeTest2() {
         HashMap<String, Type> hm = new HashMap<>(){{put("x", Type.INTEGER);}};
         Parser p = new Parser(hm);
-        ExprNode expr_node1 = p.parseExpr("x-x");
-        ExprNode expr_node2 = p.parseExpr("\"a\"*30");
+        ExprOrCallNode expr_node1 = p.parseExpr("x-x");
+        ExprOrCallNode expr_node2 = p.parseExpr("\"a\"*30");
         FunctionInfo function = new FunctionInfo("aaa", Arrays.asList(Type.INTEGER, Type.STRING), FunctionReturnType.STR);
         FunNode fun_node = new FunNode(function, Arrays.asList(expr_node1, expr_node2));
         assertEquals(fun_node.getTree(), Main.get_str_from_file(PATH + "fun_node_test2.txt"));
@@ -56,7 +57,7 @@ public class TreeBuildTests {
     @Test
     void funNodeTest3() {
         Parser p = new Parser();
-        ExprNode expr_node1 = p.parseExpr("\"a\"*30");
+        ExprOrCallNode expr_node1 = p.parseExpr("\"a\"*30");
         FunctionInfo function = new FunctionInfo("f", Arrays.asList(Type.STRING), FunctionReturnType.INT);
         FunNode fun_node = new FunNode(function, Arrays.asList(expr_node1));
         assertEquals(fun_node.getTree(), Main.get_str_from_file(PATH + "fun_node_test3.txt"));
@@ -65,7 +66,7 @@ public class TreeBuildTests {
     @Test
     void funNodeTypeMismatchingTest() {
         Parser p = new Parser();
-        ExprNode expr_node1 = p.parseExpr("\"a\"*30");
+        ExprOrCallNode expr_node1 = p.parseExpr("\"a\"*30");
         FunctionInfo function = new FunctionInfo("func", Arrays.asList(Type.INTEGER), FunctionReturnType.INT);
         FunNode fun_node = new FunNode(function, Arrays.asList(expr_node1));
         assertEquals(fun_node.getTree(), Main.get_str_from_file(PATH + "fun_node_test4.txt"));
@@ -74,8 +75,8 @@ public class TreeBuildTests {
     @Test
     void funNodeTypeTooManyArgsTest() {
         Parser p = new Parser();
-        ExprNode expr_node1 = p.parseExpr("\"a\"*30");
-        ExprNode expr_node2 = p.parseExpr("\"aboba\"");
+        ExprOrCallNode expr_node1 = p.parseExpr("\"a\"*30");
+        ExprOrCallNode expr_node2 = p.parseExpr("\"aboba\"");
         FunctionInfo function = new FunctionInfo("smth", Arrays.asList(Type.STRING), FunctionReturnType.INT);
         FunNode fun_node = new FunNode(function, Arrays.asList(expr_node1, expr_node2));
         assertEquals(fun_node.getTree(), Main.get_str_from_file(PATH + "fun_node_test5.txt"));

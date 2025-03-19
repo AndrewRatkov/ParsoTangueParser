@@ -1,0 +1,5 @@
+[DEF FUN function(INTEGER a, INTEGER b)=>INT]
+|   
++-->[RETURN]--->[INT,+ ]------->[INT,a]
+                    |
+                    +---------->[INT,b]

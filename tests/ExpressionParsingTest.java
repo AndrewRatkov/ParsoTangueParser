@@ -112,12 +112,12 @@ public class ExpressionParsingTest {
         return cur_node.getBinop() == expected_binop;
     }
 
-    private boolean checkStructure(ExprNode node, Map<String, String> expected_vals, Map<String, Binop>expected_binops) {
+    private boolean checkStructure(ExprOrCallNode node, Map<String, String> expected_vals, Map<String, Binop>expected_binops) {
         for (String path : expected_vals.keySet()) {
-            if (!goToChild(node, path, expected_vals.get(path))) return false;
+            if (!goToChild((ExprNode)node, path, expected_vals.get(path))) return false;
         }
         for (String path : expected_binops.keySet()) {
-            if (!checkBinop(node, path, expected_binops.get(path))) return false;
+            if (!checkBinop((ExprNode)node, path, expected_binops.get(path))) return false;
         }
         return true;
     }
@@ -144,7 +144,7 @@ public class ExpressionParsingTest {
                       |
         */
         Parser p = new Parser();
-        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
+        ExprOrCallNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
             "LL", "2",
@@ -183,7 +183,7 @@ public class ExpressionParsingTest {
                       |
         */
         Parser p = new Parser();
-        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
+        ExprOrCallNode root = p.parsePrimaryExpr(st_nodes, st_binops, st_nodes.size());
 
         Map<String, String> expected_vals = Map.of(
             "LLL", "2",
@@ -213,15 +213,15 @@ public class ExpressionParsingTest {
         }
 
         Parser p = new Parser();
-        ExprNode root = p.parsePrimaryExpr(st_nodes, st_binops, LEN);
+        ExprOrCallNode root = p.parsePrimaryExpr(st_nodes, st_binops, LEN);
         
         String s = "";
         for (int i = 0; i < LEN - 1; ++i) {
-            assertTrue(checkBinop(root, s, BinopConstants.SUB));
-            assertTrue(goToChild(root, s + "R", String.valueOf(LEN - 1 - i)));
+            assertTrue(checkBinop((ExprNode)root, s, BinopConstants.SUB));
+            assertTrue(goToChild((ExprNode)root, s + "R", String.valueOf(LEN - 1 - i)));
             s += "L";
         }
-        assertTrue(goToChild(root, s, String.valueOf(0)));
+        assertTrue(goToChild((ExprNode)root, s, String.valueOf(0)));
     }
 
     @ParameterizedTest
@@ -233,7 +233,7 @@ public class ExpressionParsingTest {
     })
     void testParseExpr(String expr) {
         Parser p = new Parser();
-        ExprNode root = p.parseExpr(expr);
+        ExprNode root = (ExprNode)p.parseExpr(expr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
         assertTrue(goToChild(root, "R", "3"));
@@ -250,7 +250,7 @@ public class ExpressionParsingTest {
     })
     void testParseExpr2(String expr) {
         Parser p = new Parser();
-        ExprNode root = p.parseExpr(expr);
+        ExprNode root = (ExprNode)p.parseExpr(expr);
         assertTrue(root.getType() == Expr.ErrorExpr);
         assertTrue(checkBinop(root, "", BinopConstants.L));
         assertTrue(checkBinop(root, "L", BinopConstants.EQ));
@@ -281,7 +281,7 @@ public class ExpressionParsingTest {
     @Test
     void testParseEmptyString() {
         Parser p = new Parser();
-        ExprNode n = p.parseExpr("");
+        ExprNode n = (ExprNode)p.parseExpr("");
         assertEquals(n.getType(), Expr.ErrorExpr);
     }
 }

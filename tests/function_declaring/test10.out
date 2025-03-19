@@ -1,0 +1,23 @@
+[DEF FUN abacaba(INTEGER x)=>STR]
+|   
++-->IF
+    |
+    +--->[INT,==]------->[CALL STR abacaba]------->[INT,0]
+    |        |
+    |        +---------->[STR,"hrundelair"]
+    |
+    THEN
+    |
+    +--->[RETURN]--->[STR,"OK"]
+    |
+    ELSE
+    |
+    +--->[DEF int x]--->[INT,+ ]------->[INT,x]
+    |                       |
+    |                       +---------->[INT,1]
+    |
+    +--->[RETURN]--->[STR,* ]------->[STR,"NOT OK"]
+    |                    |
+    |                    +---------->[INT,x]
+    |
+    FI

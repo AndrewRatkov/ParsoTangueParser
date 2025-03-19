@@ -1,0 +1,17 @@
+[DEF FUN loop(INTEGER x)=>VOID]
+|   
++-->IF
+|   |
+|   +--->[INT,> ]------->[INT,x]
+|   |        |
+|   |        +---------->[INT,0]
+|   |
+|   THEN
+|   |
+|   +--->[RETURN]--->[CALL VOID loop]------->[INT,- ]------->[INT,x]
+|   |                                            |
+|   |                                            +---------->[INT,1]
+|   |
+|   FI
+|   
++-->[RETURN]

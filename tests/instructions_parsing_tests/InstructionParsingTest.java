@@ -62,13 +62,6 @@ public class InstructionParsingTest {
         assertEquals(p.Variables.get("x"), Type.INTEGER);
     }
 
-    @Test
-    void testReturnParsing() {
-        Parser p = new Parser();
-        p.enableReturnInstructions(FunctionReturnType.INT);
-        System.out.println(p.parseInstr("return 12;").getTree());
-    }
-
     @ParameterizedTest
     @CsvSource({
         "test1,INT",
@@ -87,7 +80,8 @@ public class InstructionParsingTest {
         String instr = Main.get_str_from_file(PATH + test_name + ".in");
         while (instr.endsWith("\n")) instr = instr.substring(0, instr.length() - 1);
         InstrNode n = p.parseInstr(instr);
-        System.err.println(n.getTree());
+        
+        
         assertEquals(n.getTree(), Main.get_str_from_file(PATH + test_name + ".out"));
     }
 }

@@ -29,22 +29,19 @@ public class ExprNode implements ExprOrCallNode {
         Expr left_type;
         if (left instanceof ExprNode) {
             left_type = ((ExprNode)left).type;
-        } else if (left instanceof FunNode && ((FunNode)left).getFunc().output_type != FunctionReturnType.VOID) {
+        } else if (left instanceof FunNode && ((FunNode)left).getFunc() != null && ((FunNode)left).getFunc().output_type != FunctionReturnType.VOID) {
             left_type = Constants.get_expr_from_function_return_type(((FunNode)left).getFunc().output_type);
         } else {
-            type = Expr.ErrorExpr;
-            value = "Cannot apply binop to void functions results";
-            return;
+            left_type = Expr.ErrorExpr; // Cannot apply binop to void functions results
         }
 
         Expr right_type;
         if (right instanceof ExprNode) {
             right_type = ((ExprNode)right).type;
-        } else if (right instanceof FunNode && ((FunNode)right).getFunc().output_type != FunctionReturnType.VOID) {
+        } else if (right instanceof FunNode && ((FunNode)right).getFunc() != null && ((FunNode)right).getFunc().output_type != FunctionReturnType.VOID) {
             right_type = Constants.get_expr_from_function_return_type(((FunNode)right).getFunc().output_type);
         } else {
-            type = Expr.ErrorExpr;
-            value = "Cannot apply binop to void functions results";
+            right_type = Expr.ErrorExpr; // Cannot apply binop to void functions results
             return;
         }
 

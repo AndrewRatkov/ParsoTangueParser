@@ -1,0 +1,12 @@
+def int id(int x)
+if x + 30 == 0
+then return 30+30;
+fi
+
+if id(x - 1)
+then return id(x - 2);
+fi
+
+return 0;
+
+enddef

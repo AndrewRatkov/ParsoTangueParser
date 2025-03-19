@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class Constants{
     public static final List<String> TYPE_NAMES = Arrays.asList("int", "str");
-    public static final List<String> KEYWORDS = Arrays.asList("int", "str", "fi", "if", "then", "else", "return");
+    public static final List<String> KEYWORDS = Arrays.asList("int", "str", "fi", "if", "then", "else", "return", "def", "enddef", "void");
     public static final String WHITESPACES = " \t\r\n";
     
     private static final Map<String, Expr> type_by_str = new HashMap<>();
@@ -18,6 +18,11 @@ public class Constants{
 
     public static Expr get_expr(String s) {
         return type_by_str.get(s);
+    }
+
+    public static Type type_from_str(String s) {
+        if (s.equals("int")) return Type.INTEGER;
+        else return Type.STRING;
     }
 
     public static Expr get_expr_from_type(Type t) {

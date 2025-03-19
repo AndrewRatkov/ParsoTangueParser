@@ -1,0 +1,25 @@
+[DEF FUN something(INTEGER x, STRING y)=>STR]
+|   
++-->IF
+|   |
+|   +--->[INT,> ]------->[INT,x]
+|   |        |
+|   |        +---------->[INT,1]
+|   |
+|   THEN
+|   |
+|   +--->[DEF str z]--->[STR,* ]------->[STR,y]
+|   |                       |
+|   |                       +---------->[INT,2]
+|   |
+|   +--->[RETURN]--->[STR,+ ]------->[STR,z]
+|   |                    |
+|   |                    +---------->[STR,"aba"]
+|   |
+|   FI
+|   
++-->[CALL STR something]------->[INT,1]
+|             |
+|             +---------------->[STR,"cucu"]
+|   
++-->[RETURN]--->[STR,"abacaba"]

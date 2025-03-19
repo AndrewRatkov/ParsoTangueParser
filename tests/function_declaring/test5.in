@@ -1,0 +1,9 @@
+def str something(int x, str y)
+if x > 1 then
+str z := y * 2;
+return z + "aba";
+fi
+something(1, "cucu");
+return "abacaba";
+enddef
+
