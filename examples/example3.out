@@ -61,3 +61,35 @@
   |                           +------------->[INT,y]
   |
   +---->[CALL VOID doNothing]
+  |
+  +---->[DEF FUN evenDoesntWork(INTEGER new)=>INT]
+        |   
+        +-->IF
+            |
+            +--->[INT,==]------->[INT,new]
+            |        |
+            |        +---------->[INT,0]
+            |
+            THEN
+            |
+            +--->[RETURN]--->[INT,1]
+            |
+            ELSE
+            |
+            +--->IF
+            |    |
+            |    +--->[INT,==]------->[INT,new]
+            |    |        |
+            |    |        +---------->[INT,1]
+            |    |
+            |    THEN
+            |    |
+            |    +--->[RETURN]--->[INT,0]
+            |    |
+            |    ELSE
+            |    |
+            |    +--->[RETURN]--->[INT,1]
+            |    |
+            |    FI
+            |
+            FI

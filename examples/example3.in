@@ -28,3 +28,19 @@ int y := z == x * "a";
 loopIncrX(30);
 int a := gcd(x, y);
 doNothing();
+
+def int evenDoesntWork(int new)
+if
+    new == 0
+then
+    return 1;
+else
+    if
+        new == 1
+    then
+        return 0;
+    else
+        return 1;
+    fi
+fi
+enddef
